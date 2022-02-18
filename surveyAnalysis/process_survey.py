@@ -1,8 +1,11 @@
+"""
+Loading and plotting module for analysis of survey responses.
+author: @RonyHirsch
+"""
+import re
+import os
 import pandas as pd
 import numpy as np
-from tabulate import tabulate
-import os
-import re
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -20,10 +23,14 @@ RESP_ID = "Response ID"
 
 
 def parse_responses(data_path):
+    """
+    Method used to parse the raw survey dataframe and perform basic sanity checks before further action is taken.
+    :param data_path: path to the survey responses csv file
+    :return: If no errors arise, returns the suervey responses dataframe
+    """
     data_raw = pd.read_csv(data_path)  # raw data
     data_raw = data_raw.dropna(axis=0, how='all')
     subnum_raw = data_raw.shape[0]
-    #print(tabulate(data_raw, headers='keys'))  # view (SciView in PyCharm struggles with displaying dfs with nullable int)
     data_complete = data_raw[data_raw[FINAL_PAGE_COLNAME] == FINAL_PAGE]
     # make sure we get rid of test responses made by the experimenters
     df = data_complete.select_dtypes(object)
@@ -35,14 +42,14 @@ def parse_responses(data_path):
     # Sanity checks:
     # Question columns: are all columns starting column number 5
     qs_dict = {f"Q{i-4}": data_complete.columns.tolist()[i] for i in range(5, len(data_complete.columns.tolist()))}
-    if not(data_complete[pd.isna(data_complete[qs_dict["Q2"]])].empty):  # a question in page 1 everyone should fill
+    if not data_complete[pd.isna(data_complete[qs_dict["Q2"]])].empty:  # a question in page 1 everyone should fill
         print("ERROR: subjects are marked complete but missed Q2")
-        return
+        return None
     data_subset_tests = data_complete[data_complete[qs_dict["Q2"]] != "Never (0%)"]  # subjects who DID test their exps
     p2_mandatory = [qs_dict[f"Q{i}"] for i in range(PAGE_2_FIRST, PAGE_2_NOTALL) if OTHER not in qs_dict[f"Q{i}"]]
     if data_subset_tests[p2_mandatory].isnull().values.any():  # subjects tested their exps but had no answers
         print("ERROR: subjects are marked complete and tested their experiments but missing answers from page 2")
-        return
+        return None
 
     # Cosmetics
     data_complete.replace({SOME_OLD: SOME_NEW}, inplace=True)
@@ -51,13 +58,27 @@ def parse_responses(data_path):
 
 
 def save_plot(save_path, save_name, w=10, h=10, dpi=1000):
+    """
+    Plot saving method
+    :param save_path: path to save plots in
+    :param save_name: name of saved plot
+    :param w: plot width
+    :param h: plot height
+    :param dpi: plot DPI
+    """
     figure = plt.gcf()  # get the current figure
     figure.tight_layout()
     figure.set_size_inches(w, h)
     plt.savefig(os.path.join(save_path, f"PLOT_{save_name}.png"), dpi=dpi)
+    return
 
 
 def plot_data(dataset, save_path):
+    """
+    Manages all plotting of data
+    :param dataset: survey responses dataframe
+    :param save_path: path to save plots in
+    """
     qs_dict = {f"Q{i-4}": dataset.columns.tolist()[i] for i in range(5, len(dataset.columns.tolist()))}
     # Generally, how many experiments were carried out and tested
     colors = ["#97AFB3", "#C39345", "#B66E3B", "#DAA79B"]  # all, most, never, some
@@ -75,8 +96,8 @@ def plot_data(dataset, save_path):
     tested_dataset = dataset[dataset[qs_dict["Q2"]] != NEVER]  # first, take ONLY people who tested their experiment
 
     resp_counts = []
-    for Q in [qs_dict[f"Q{i}"] for i in range(3, 8)]:
-        resp_counts.append(tested_dataset[Q].value_counts())
+    for q in [qs_dict[f"Q{i}"] for i in range(3, 8)]:
+        resp_counts.append(tested_dataset[q].value_counts())
     tested_aspects = pd.concat(resp_counts, keys=["Experiment Duration",
                                               "Event Timing",
                                               "Event Content",
@@ -172,8 +193,6 @@ def plot_data(dataset, save_path):
     plt.clf()
     plt.close()
 
-
-
     # What did you record?
     relevant_cols = [RESP_ID] + [qs_dict[f"Q{x}"] for x in range(32, 39)]
     recorded = tested_dataset[relevant_cols]  # PERFORMED TESTS
@@ -202,8 +221,6 @@ def plot_data(dataset, save_path):
     save_plot(save_path, "7")
     plt.clf()
     plt.close()
-
-
 
     # Have you ever noticed an issue after data collection has begun?
     issues_tested = tested_dataset[[RESP_ID, qs_dict[f"Q39"]]]  # PERFORMED TESTS
@@ -256,8 +273,14 @@ def plot_data(dataset, save_path):
 
 
 def manage_processing(data_path, save_path):
+    """
+    Manage any processing of the survey responses.
+    :param data_path: path to the survey csv file
+    :param save_path: path to save all plots in
+    """
     dataset = parse_responses(data_path)  # parse the data
-    plot_data(dataset, save_path)
+    if dataset:
+        plot_data(dataset, save_path)
 
 
 if __name__ == "__main__":
