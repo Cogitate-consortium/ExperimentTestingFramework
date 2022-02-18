@@ -284,5 +284,5 @@ def manage_processing(data_path, save_path):
 
 
 if __name__ == "__main__":
-    manage_processing(data_path=r"C:\Users\ronyhirschhorn\Documents\Github Repositories\ExperimentTestingFramework\surveyAnalysis\results-survey475519.csv",
-                    save_path=r"C:\Users\ronyhirschhorn\Downloads\testing_framework")
+    manage_processing(data_path=r"...\results-survey475519.csv",
+                    save_path=r"...\testing_framework")
