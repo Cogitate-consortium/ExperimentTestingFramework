@@ -166,13 +166,13 @@ def plot_data(dataset, save_path):
     ax.axis('equal')
     # outer ring:
     no_report_general = no_report.groupby([qs_dict["Q24"]])[RESP_ID].count()
-    outer, _ = ax.pie(x=no_report_general, radius=1.3, colors=[report_no[3], report_some[3]],
-                      labels=no_report_general.keys(), textprops={'fontsize': 12})
+    outer, _, junk = ax.pie(x=no_report_general, radius=1.3, colors=[report_no[3], report_some[3]],
+                      labels=no_report_general.keys(), textprops={'fontsize': 12}, autopct="%.1f%%", pctdistance=0.85)
     plt.setp(outer, width=0.3, edgecolor='white')
     # inner ring:
     labs = [re.sub(r'^.*?:', '', x) for x in no_report_cnt.keys()]
-    inner, _ = ax.pie(x=no_report_cnt, radius=1.3-0.3, colors=report_no[:3] + report_some[:3],
-                      labels=labs, labeldistance=0.65, textprops={'fontsize': 8.5})
+    inner, _, junk = ax.pie(x=no_report_cnt, radius=1.3-0.3, colors=report_no[:3] + report_some[:3],
+                      labels=labs, labeldistance=0.65, textprops={'fontsize': 8.5}, autopct="%.1f%%", pctdistance=0.8)
     plt.setp(inner, width=0.4, edgecolor='white')
     plt.margins(0, 0)
     plt.title("Reporting Experiment Testing in Published Experiments")
@@ -279,7 +279,7 @@ def manage_processing(data_path, save_path):
     :param save_path: path to save all plots in
     """
     dataset = parse_responses(data_path)  # parse the data
-    if dataset:
+    if dataset is not None:
         plot_data(dataset, save_path)
 
 
