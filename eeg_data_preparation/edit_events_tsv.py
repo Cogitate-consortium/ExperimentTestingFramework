@@ -154,7 +154,7 @@ def manage_edit_events_tsv(bids_root, overwrite=False):
     # Listing all the participants in the bids root:
     subject_list = list_subjects(bids_root, prefix="sub-")
     # Looping through each:
-    for sub in SUB_LIST:
+    for sub in subject_list:
         # First, align the events from the signal to the log files:
         events_new_ts, tsv_file = align_events(bids_root, sub)
         # Then, rework the events descriptions to be more readily compliant with out preprocessing pipeline:
