@@ -138,7 +138,7 @@ def edit_events_desc(events_new_ts):
     # Now recreating the new events:
     new_events_df = pd.DataFrame({
         "onset": events_new_ts["onset"].values,
-        "duration": events_new_ts["onset"].values,
+        "duration": events_new_ts["duration"].values,
         "trial_type": new_evt_desc
     })
 
