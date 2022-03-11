@@ -8,11 +8,14 @@
   "preprocessing_folder": "epoching",
   "preprocess_steps": "notfil_car",
   "analysis_parameters": {
-    "P1_P300": {
+    "animate_vs_inanimate": {
       "signal": "broadband",
       "do_baseline_correction": true,
       "baseline_correction_method": "mean",
-      "conditions": null,
+      "conditions": {
+        "animate": [],
+        "inanimate": []
+      },
       "components": {
         "P1": ["PO3", "POz", "PO4"],
         "P300": ["CP1", "CPz", "CP2", "P1", "Pz", "P2"]
