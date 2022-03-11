@@ -63,7 +63,7 @@ def single_participant_evoked():
         joint_files_name = str(Path(save_path_fig, file_name_generator(save_path_fig, parameters_object.files_prefix,
                                                                        "{0}_joint", ".png", data_type="eeg")))
         topo_files_name = str(Path(save_path_fig, file_name_generator(save_path_fig, parameters_object.files_prefix,
-                                                                      "{0}_joint", ".png", data_type="eeg")))
+                                                                      "{0}_topo", ".png", data_type="eeg")))
 
         # Selecting the conditions of interest:
         if analysis_parameters["conditions"] is not None:
