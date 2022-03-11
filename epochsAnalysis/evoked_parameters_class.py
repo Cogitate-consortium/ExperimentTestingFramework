@@ -7,7 +7,7 @@ from pathlib import Path
 from utilities import find_files
 
 
-class ExtractComponentClass:
+class EvokedParametersClass:
     """
     This class creates the analysis parameters object, based on a json file.
     :return:

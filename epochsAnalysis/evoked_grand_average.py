@@ -1,12 +1,12 @@
 import argparse
-from parameters_class import ExtractComponentClass
+from evoked_parameters_class import EvokedParametersClass
 from utilities import path_generator, file_name_generator, list_subjects
 from pathlib import Path
 import mne
 import matplotlib.pyplot as plt
 
 
-def grand_average():
+def evoked_grand_average():
     """
     This function loads all the participants evoked data and perform grand average. The grand average is then plotted
     in different ways to make data exploration easier
@@ -21,7 +21,7 @@ def grand_average():
     args = parser.parse_args()
 
     # Create the parameters file
-    parameters_object = ExtractComponentClass(args.AnalysisParametersFile, sub_id)
+    parameters_object = EvokedParametersClass(args.AnalysisParametersFile, sub_id)
 
     # Looping through the different analyses configured:
     for analysis_name, analysis_parameters in parameters_object.analysis_parameters.items():
@@ -54,9 +54,9 @@ def grand_average():
                                                                       "{0}_topo", ".png", data_type="eeg")))
 
         # Generate the names of the files to load for each subject:
-        subject_data_root = path_generator(Path(parameters_object.BIDS_root,
-                                                "derivatives", "components", "sub-{0}"), analysis=analysis_name,
-                                           preprocessing_steps=parameters_object.preprocess_steps, data=True)
+        subject_data_root = Path(parameters_object.BIDS_root,
+                                                "derivatives", "components", "sub-{0}", "data",
+                                                analysis_name, parameters_object.preprocess_steps)
         sub_file_prefix = "sub-{0}_task-" + parameters_object.task_name + "_analysis-components_"
         subject_evoked_file = str(file_name_generator(subject_data_root,
                                                       sub_file_prefix,
@@ -69,7 +69,8 @@ def grand_average():
         # Loading all subjects evoked data:
         sub_evo = []
         for sub in subjects_list:
-            sub_evo.append(mne.read_evokeds(subject_evoked_file.format(sub)))
+            if sub != sub_id:
+                sub_evo.append(mne.read_evokeds(subject_evoked_file.format(sub), verbose='warning')[0])
 
         # ------------------------------------------------------------------------------------------
         # Perform grand average and plotting:
@@ -104,4 +105,4 @@ def grand_average():
 
 
 if __name__ == "__main__":
-    grand_average()
+    evoked_grand_average()

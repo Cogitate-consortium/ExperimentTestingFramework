@@ -1,12 +1,12 @@
 import argparse
-from parameters_class import ExtractComponentClass
+from evoked_parameters_class import EvokedParametersClass
 from utilities import find_files, baseline_scaling, path_generator, file_name_generator
 from pathlib import Path
 import mne
 import matplotlib.pyplot as plt
 
 
-def extract_component():
+def compute_evoked():
     # Get the parameters:
     parser = argparse.ArgumentParser(
         description="Implements analysis of EDFs for experiment1")
@@ -17,7 +17,7 @@ def extract_component():
     args = parser.parse_args()
 
     # Create the parameters file
-    parameters_object = ExtractComponentClass(args.AnalysisParametersFile, args.subjectID)
+    parameters_object = EvokedParametersClass(args.AnalysisParametersFile, args.subjectID)
 
     # Looping through the different analyses configured:
     for analysis_name, analysis_parameters in parameters_object.analysis_parameters.items():
@@ -73,6 +73,7 @@ def extract_component():
         if analysis_parameters["conditions"] is not None:
             epochs = epochs[analysis_parameters["conditions"]]
         # Do baseline correction if needed:
+        evo_nocorr = epochs.average()
         if analysis_parameters["do_baseline_correction"]:
             baseline_scaling(
                 epochs, correction_method=analysis_parameters["baseline_correction_method"])
@@ -120,4 +121,4 @@ def extract_component():
 
 
 if __name__ == "__main__":
-    extract_component()
+    compute_evoked()
