@@ -54,7 +54,7 @@ class EpochAnalysisClass:
         self.SUBJ_ID = sub_id
 
         # Setting the root for the produced files:
-        self.save_root = str(Path(self.BIDS_root, "derivatives", "components"))
+        self.save_root = str(Path(self.BIDS_root, "derivatives", "components", "sub-" + self.SUBJ_ID))
         # Adding the root to the input file:
         self.input_file_root = str(Path(self.BIDS_root, "derivatives", "preprocessing", "sub-" + self.SUBJ_ID,
                                         self.data_type, self.preprocessing_folder))
