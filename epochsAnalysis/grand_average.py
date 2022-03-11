@@ -7,7 +7,12 @@ import matplotlib.pyplot as plt
 
 
 def grand_average():
-    # Get the parameters:
+    """
+    This function loads all the participants evoked data and perform grand average. The grand average is then plotted
+    in different ways to make data exploration easier
+    :return:
+    """
+    # Set the parameters:
     parser = argparse.ArgumentParser(
         description="Implements analysis of EDFs for experiment1")
     parser.add_argument('--AnalysisParametersFile', type=str, default=None,
@@ -20,6 +25,9 @@ def grand_average():
 
     # Looping through the different analyses configured:
     for analysis_name, analysis_parameters in parameters_object.analysis_parameters.items():
+        # ==============================================================================================================
+        # Prepare path variables:
+        # ==============================================================================================================
         # Prepare saving directories:
         save_path_fig = path_generator(parameters_object.save_root,
                                        analysis=analysis_name,
@@ -33,10 +41,7 @@ def grand_average():
                                         analysis=analysis_name,
                                         preprocessing_steps=parameters_object.preprocess_steps,
                                         fig=False, results=False, data=True)
-        # Dumping the parameters there:
-        parameters_object.save_parameters(save_path_fig)
-        parameters_object.save_parameters(save_path_results)
-        parameters_object.save_parameters(save_path_data)
+
         # Prepare the different file names for saving:
         evoked_file_name = Path(save_path_data, file_name_generator(save_path_data, parameters_object.files_prefix,
                                                                     "data-ave", ".fif", data_type="eeg"))
@@ -49,22 +54,28 @@ def grand_average():
                                                                       "{0}_topo", ".png", data_type="eeg")))
 
         # Generate the names of the files to load for each subject:
-        subject_data_root = Path(Path(parameters_object.BIDS_root, "derivatives", "components", "sub-{0}"))
-        subject_evoked_file = str(Path(save_path_data, file_name_generator(subject_data_root,
-                                                                          parameters_object.files_prefix,
-                                                                          "data-ave", ".fif", data_type="eeg")))
+        subject_data_root = path_generator(Path(parameters_object.BIDS_root,
+                                                "derivatives", "components", "sub-{0}"), analysis=analysis_name,
+                                           preprocessing_steps=parameters_object.preprocess_steps, data=True)
+        sub_file_prefix = "sub-{0}_task-" + parameters_object.task_name + "_analysis-components_"
+        subject_evoked_file = str(file_name_generator(subject_data_root,
+                                                      sub_file_prefix,
+                                                      "data-ave", ".fif", data_type="eeg"))
 
+        # ------------------------------------------------------------------------------------------
+        # Load all subjects data:
         # Listing all the subjects:
-        subjects_list = list_subjects(Path(parameters_object.BIDS_root, "derivatives", "component"))
+        subjects_list = list_subjects(Path(parameters_object.BIDS_root, "derivatives", "components"))
         # Loading all subjects evoked data:
         sub_evo = []
         for sub in subjects_list:
             sub_evo.append(mne.read_evokeds(subject_evoked_file.format(sub)))
-        # Perform the grand average:
+
+        # ------------------------------------------------------------------------------------------
+        # Perform grand average and plotting:
         grand_avg = mne.grand_average(sub_evo)
         # Save the grand average data:
         grand_avg.save(evoked_file_name)
-
         # Plot the grand average:
         grand_avg.plot_joint(times="peaks", title="Grand average evoked responses",
                              show=False, picks=parameters_object.data_type)
@@ -76,6 +87,8 @@ def grand_average():
         plt.savefig(topo_files_name.format("all"), transparent=True)
         plt.close()
 
+        # ------------------------------------------------------------------------------------------
+        # Extract each components data:
         # Looping through the components:
         for component in analysis_parameters["components"].keys():
             comp_evoked = grand_avg.copy().pick(analysis_parameters["components"][component])
@@ -86,6 +99,8 @@ def grand_average():
                                    picks=parameters_object.data_type)
             plt.savefig(joint_files_name.format(component), transparent=True)
             plt.close()
+
+        return None
 
 
 if __name__ == "__main__":
