@@ -1,0 +1,22 @@
+{
+  "raw_root": "/mnt/beegfs/XNAT/COGITATE/ECoG/Raw/projects/CoG_ECoG_PhaseII",
+  "BIDS_root": "/mnt/beegfs/XNAT/workspace/001_testing_framework/data/bids",
+  "SUBJ_ID": "SF102",
+  "session": "V1",
+  "task_name": "rsvp",
+  "data_type": "eeg",
+  "preprocessing_folder": "epoching",
+  "preprocess_steps": "notfil_car",
+  "analysis_parameters": {
+    "P1_P300": {
+      "signal": "broadband",
+      "do_baseline_correction": true,
+      "baseline_correction_method": "mean",
+      "conditions": null,
+      "components": {
+        "P1": ["PO3", "POz", "PO4"],
+        "P300": ["CP1", "CPz", "CP2", "P1", "Pz", "P2"]
+      }
+    }
+  }
+}
