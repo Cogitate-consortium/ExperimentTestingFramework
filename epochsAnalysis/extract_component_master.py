@@ -3,7 +3,6 @@ from parameters_class import ExtractComponentClass
 from utilities import find_files, baseline_scaling, path_generator, file_name_generator
 from pathlib import Path
 import mne
-import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -53,11 +52,16 @@ def extract_component():
         parameters_object.save_parameters(save_path_results)
         parameters_object.save_parameters(save_path_data)
         # Generate the different file names:
-        components_files_name = str(
+        epochs_file_name = Path(save_path_data, file_name_generator(save_path_data, parameters_object.files_prefix,
+                                                                    "data-epo", ".fif", data_type="eeg"))
+        evoked_file_name = Path(save_path_data, file_name_generator(save_path_data, parameters_object.files_prefix,
+                                                                    "data-ave", ".fif", data_type="eeg"))
+        comp_epo_files_name = str(
             Path(save_path_data, file_name_generator(save_path_data, parameters_object.files_prefix,
                                                      "{0}_data-epo", ".fif", data_type="eeg")))
-        evoked_files_name = str(Path(save_path_data, file_name_generator(save_path_data, parameters_object.files_prefix,
-                                                                         "{0}_data-ave", ".fif", data_type="eeg")))
+        comp_evo_files_name = str(Path(save_path_data, file_name_generator(save_path_data,
+                                                                           parameters_object.files_prefix,
+                                                                           "{0}_data-ave", ".fif", data_type="eeg")))
         image_files_name = str(Path(save_path_fig, file_name_generator(save_path_fig, parameters_object.files_prefix,
                                                                        "{0}_image", ".png", data_type="eeg")))
         joint_files_name = str(Path(save_path_fig, file_name_generator(save_path_fig, parameters_object.files_prefix,
@@ -75,6 +79,9 @@ def extract_component():
 
         # Compute the evoked response:
         evoked = epochs.average()
+        # Save the epochs and evoked after the conditions selection and baseline correction:
+        epochs.save(epochs_file_name, overwrite=True)
+        evoked.save(evoked_file_name)
 
         # Plot all the electrodes:
         evoked.plot_joint(times="peaks", title="Evoked responses", show=False, picks=parameters_object.data_type)
@@ -94,8 +101,8 @@ def extract_component():
             comp_epochs = epochs.copy().pick(analysis_parameters["components"][component])
             comp_evoked = evoked.copy().pick(analysis_parameters["components"][component])
             # Saving the data:
-            comp_epochs.save(components_files_name.format(component), overwrite=True)
-            comp_evoked.save(evoked_files_name.format(component))
+            comp_epochs.save(comp_epo_files_name.format(component), overwrite=True)
+            comp_evoked.save(comp_evo_files_name.format(component))
 
             # ----------------------------------------------------
             # Plotting:
@@ -104,7 +111,7 @@ def extract_component():
             plt.savefig(image_files_name.format(component), transparent=True)
             plt.close()
             # Joint:
-            comp_evoked.plot_joint(times="peaks", title="Evoked responses", show=False,
+            comp_evoked.plot_joint(times="peaks", title=component + "evoked responses", show=False,
                                    picks=parameters_object.data_type)
             plt.savefig(joint_files_name.format(component), transparent=True)
             plt.close()
