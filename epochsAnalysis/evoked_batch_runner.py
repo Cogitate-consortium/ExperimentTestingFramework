@@ -12,9 +12,9 @@ def batch_runner(bids_root=None, analysis="epochs_analysis"):
     """
     # Getting the current dir
     pwd = os.getcwd()
-    # Set path to the current configs:
+    # Set path to the current evoked_configs:
     if analysis == "epochs_analysis":
-        current_config_dir = os.path.join(pwd, "configs")
+        current_config_dir = os.path.join(pwd, "evoked_configs")
     else:
         raise Exception("The analysis you passed is not supported!")
     # Find all the json files in the current config:

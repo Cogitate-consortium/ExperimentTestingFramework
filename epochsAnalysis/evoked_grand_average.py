@@ -1,5 +1,5 @@
 import argparse
-from evoked_parameters_class import EvokedParametersClass
+from paramters_class import EvokedParametersClass
 from utilities import path_generator, file_name_generator, list_subjects
 from pathlib import Path
 import mne
