@@ -7,7 +7,7 @@ from pathlib import Path
 from utilities import find_files
 
 
-class EpochAnalysisClass:
+class ExtractComponentClass:
     """
     This class creates the analysis parameters object, based on a json file.
     :return:

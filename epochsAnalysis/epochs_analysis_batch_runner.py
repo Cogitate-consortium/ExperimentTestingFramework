@@ -26,7 +26,7 @@ def batch_runner(bids_root=None, analysis="epochs_analysis"):
         subjects_list = list_subjects(
             Path(bids_root, "derivatives", "preprocessing"))
         for subject in subjects_list:
-            run_command = "sbatch " + "epochs_analysis_slurm.sh" \
+            run_command = "sbatch " + "extract_component_slurm.sh" \
                           + " --analysis_parameters_file=" \
                           + '"{}"'.format(config) \
                           + " --participant_id=" + '"{}"'.format(subject)
@@ -35,5 +35,5 @@ def batch_runner(bids_root=None, analysis="epochs_analysis"):
 
 if __name__ == "__main__":
     batch_runner(
-        bids_root="/mnt/beegfs/XNAT/COGITATE/ECoG/phase_2/processed/bids",
-        analysis="responsiveness")
+        bids_root="/mnt/beegfs/XNAT/workspace/001_testing_framework/data/bids",
+        analysis="epochs_analysis")

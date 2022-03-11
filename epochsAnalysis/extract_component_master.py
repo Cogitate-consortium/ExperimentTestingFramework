@@ -1,5 +1,5 @@
 import argparse
-from parameters_class import EpochAnalysisClass
+from parameters_class import ExtractComponentClass
 from utilities import find_files, baseline_scaling, path_generator, file_name_generator
 from pathlib import Path
 import mne
@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def single_participant_evoked():
+def extract_component():
     # Get the parameters:
     parser = argparse.ArgumentParser(
         description="Implements analysis of EDFs for experiment1")
@@ -18,7 +18,7 @@ def single_participant_evoked():
     args = parser.parse_args()
 
     # Create the parameters file
-    parameters_object = EpochAnalysisClass(args.AnalysisParametersFile, args.subjectID)
+    parameters_object = ExtractComponentClass(args.AnalysisParametersFile, args.subjectID)
 
     # Looping through the different analyses configured:
     for analysis_name, analysis_parameters in parameters_object.analysis_parameters.items():
@@ -113,4 +113,4 @@ def single_participant_evoked():
 
 
 if __name__ == "__main__":
-    single_participant_evoked()
+    extract_component()
