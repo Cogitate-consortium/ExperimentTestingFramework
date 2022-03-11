@@ -60,7 +60,7 @@ class ExtractComponentClass:
                                         self.data_type, self.preprocessing_folder))
         # Creating the files prefix
         self.files_prefix = "sub-" + self.SUBJ_ID + "_task-" + self.task_name \
-                            + "_analysis-vis_resp_"
+                            + "_analysis-components_"
 
     def save_parameters(self, save_path):
         """
