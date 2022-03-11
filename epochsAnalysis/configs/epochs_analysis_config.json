@@ -8,7 +8,7 @@
   "preprocessing_folder": "epoching",
   "preprocess_steps": "notfil_car",
   "analysis_parameters": {
-    "components": {
+    "P1_P300": {
       "signal": "broadband",
       "do_baseline_correction": true,
       "baseline_correction_method": "mean",
