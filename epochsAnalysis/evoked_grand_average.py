@@ -37,28 +37,24 @@ def evoked_grand_average():
                                            analysis=analysis_name,
                                            preprocessing_steps=parameters_object.preprocess_steps,
                                            fig=False, results=True, data=False)
-        save_path_data = path_generator(parameters_object.save_root,
-                                        analysis=analysis_name,
-                                        preprocessing_steps=parameters_object.preprocess_steps,
-                                        fig=False, results=False, data=True)
 
         # Prepare the different file names for saving:
-        evoked_file_name = Path(save_path_data, file_name_generator(save_path_data, parameters_object.files_prefix,
-                                                                    "data-ave", ".fif", data_type="eeg"))
-        comp_evo_files_name = str(Path(save_path_data, file_name_generator(save_path_data,
-                                                                           parameters_object.files_prefix,
-                                                                           "{0}_data-ave", ".fif", data_type="eeg")))
-        joint_files_name = str(Path(save_path_fig, file_name_generator(save_path_fig, parameters_object.files_prefix,
-                                                                       "{0}_joint", ".png", data_type="eeg")))
-        topo_files_name = str(Path(save_path_fig, file_name_generator(save_path_fig, parameters_object.files_prefix,
-                                                                      "{0}_topo", ".png", data_type="eeg")))
+        evoked_file_name = file_name_generator(save_path_results, parameters_object.files_prefix,
+                                               "data-ave", ".fif", data_type="eeg")
+        comp_evo_files_name = str(file_name_generator(save_path_results,
+                                                      parameters_object.files_prefix,
+                                                      "{0}_data-ave", ".fif", data_type="eeg"))
+        joint_files_name = str(file_name_generator(save_path_fig, parameters_object.files_prefix,
+                                                   "{0}_joint", ".png", data_type="eeg"))
+        topo_files_name = str(file_name_generator(save_path_fig, parameters_object.files_prefix,
+                                                  "{0}_topo", ".png", data_type="eeg"))
 
         # Generate the names of the files to load for each subject:
-        subject_data_root = Path(parameters_object.BIDS_root,
-                                                "derivatives", "components", "sub-{0}", "data",
-                                                analysis_name, parameters_object.preprocess_steps)
+        subjects_results_root = Path(parameters_object.BIDS_root,
+                                     "derivatives", "components", "sub-{0}", "results",
+                                     analysis_name, parameters_object.preprocess_steps)
         sub_file_prefix = "sub-{0}_task-" + parameters_object.task_name + "_analysis-components_"
-        subject_evoked_file = str(file_name_generator(subject_data_root,
+        subject_evoked_file = str(file_name_generator(subjects_results_root,
                                                       sub_file_prefix,
                                                       "data-ave", ".fif", data_type="eeg"))
 

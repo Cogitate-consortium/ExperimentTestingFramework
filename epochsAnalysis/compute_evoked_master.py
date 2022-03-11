@@ -51,29 +51,29 @@ def compute_evoked():
         parameters_object.save_parameters(save_path_fig)
         parameters_object.save_parameters(save_path_results)
         parameters_object.save_parameters(save_path_data)
-        # Generate the different file names:
-        epochs_file_name = Path(save_path_data, file_name_generator(save_path_data, parameters_object.files_prefix,
-                                                                    "data-epo", ".fif", data_type="eeg"))
-        evoked_file_name = Path(save_path_data, file_name_generator(save_path_data, parameters_object.files_prefix,
-                                                                    "data-ave", ".fif", data_type="eeg"))
-        comp_epo_files_name = str(
-            Path(save_path_data, file_name_generator(save_path_data, parameters_object.files_prefix,
-                                                     "{0}_data-epo", ".fif", data_type="eeg")))
-        comp_evo_files_name = str(Path(save_path_data, file_name_generator(save_path_data,
-                                                                           parameters_object.files_prefix,
-                                                                           "{0}_data-ave", ".fif", data_type="eeg")))
-        image_files_name = str(Path(save_path_fig, file_name_generator(save_path_fig, parameters_object.files_prefix,
-                                                                       "{0}_image", ".png", data_type="eeg")))
-        joint_files_name = str(Path(save_path_fig, file_name_generator(save_path_fig, parameters_object.files_prefix,
-                                                                       "{0}_joint", ".png", data_type="eeg")))
-        topo_files_name = str(Path(save_path_fig, file_name_generator(save_path_fig, parameters_object.files_prefix,
-                                                                      "{0}_topo", ".png", data_type="eeg")))
+        # Generate data file names:
+        epochs_file_name = file_name_generator(save_path_data, parameters_object.files_prefix,
+                                               "data-epo", ".fif", data_type="eeg")
+        comp_epo_files_name = str(file_name_generator(save_path_data, parameters_object.files_prefix,
+                                                      "{0}_data-epo", ".fif", data_type="eeg"))
+        # Generate results (i.e. evoked responses file names):
+        evoked_file_name = file_name_generator(save_path_results, parameters_object.files_prefix,
+                                               "data-ave", ".fif", data_type="eeg")
+        comp_evo_files_name = str(file_name_generator(save_path_results,
+                                                      parameters_object.files_prefix,
+                                                      "{0}_data-ave", ".fif", data_type="eeg"))
+        # Generate figures names:
+        image_files_name = str(file_name_generator(save_path_fig, parameters_object.files_prefix,
+                                                   "{0}_image", ".png", data_type="eeg"))
+        joint_files_name = str(file_name_generator(save_path_fig, parameters_object.files_prefix,
+                                                   "{0}_joint", ".png", data_type="eeg"))
+        topo_files_name = str(file_name_generator(save_path_fig, parameters_object.files_prefix,
+                                                  "{0}_topo", ".png", data_type="eeg"))
 
         # Selecting the conditions of interest:
         if analysis_parameters["conditions"] is not None:
             epochs = epochs[analysis_parameters["conditions"]]
         # Do baseline correction if needed:
-        evo_nocorr = epochs.average()
         if analysis_parameters["do_baseline_correction"]:
             baseline_scaling(
                 epochs, correction_method=analysis_parameters["baseline_correction_method"])
@@ -112,7 +112,7 @@ def compute_evoked():
             plt.savefig(image_files_name.format(component), transparent=True)
             plt.close()
             # Joint:
-            comp_evoked.plot_joint(times="peaks", title=component + "evoked responses", show=False,
+            comp_evoked.plot_joint(times="peaks", title=component + " evoked responses", show=False,
                                    picks=parameters_object.data_type)
             plt.savefig(joint_files_name.format(component), transparent=True)
             plt.close()

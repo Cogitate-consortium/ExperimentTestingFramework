@@ -105,7 +105,7 @@ def file_name_generator(save_path, file_prefix, description, file_extension, dat
     :return: full_file_name (string) file path + file name
     """
     full_file_name = os.path.join(
-        save_path, file_prefix + description + "_" + data_type + file_extension)
+        save_path, file_prefix + data_type + "_" + description + file_extension)
 
     return full_file_name
 
