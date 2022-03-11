@@ -78,7 +78,6 @@ def evoked_grand_average():
                              show=False, picks=parameters_object.data_type)
         plt.savefig(joint_files_name.format("all"), transparent=True)
         plt.close()
-        print(joint_files_name)
         # Plotting the topomaps:
         grand_avg.plot_topomap(times="auto", ch_type=parameters_object.data_type, show=False)
         plt.savefig(topo_files_name.format("all"), transparent=True)
