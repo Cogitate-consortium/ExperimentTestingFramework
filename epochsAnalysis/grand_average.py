@@ -6,7 +6,7 @@ import mne
 import matplotlib.pyplot as plt
 
 
-def population_component():
+def grand_average():
     # Get the parameters:
     parser = argparse.ArgumentParser(
         description="Implements analysis of EDFs for experiment1")
@@ -89,4 +89,4 @@ def population_component():
 
 
 if __name__ == "__main__":
-    population_component()
+    grand_average()
