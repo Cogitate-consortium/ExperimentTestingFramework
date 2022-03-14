@@ -6,7 +6,7 @@ import mne
 import matplotlib.pyplot as plt
 
 
-def evoked_grand_average():
+def population_evoked_comparison():
     """
     This function loads all the participants evoked data and perform grand average. The grand average is then plotted
     in different ways to make data exploration easier
@@ -21,7 +21,7 @@ def evoked_grand_average():
     args = parser.parse_args()
 
     # Create the parameters file
-    parameters_object = AnalysisParametersClass("compute_evoked", args.AnalysisParametersFile, sub_id)
+    parameters_object = AnalysisParametersClass("compare_evoked", args.AnalysisParametersFile, sub_id)
 
     # Looping through the different analyses configured:
     for analysis_name, analysis_parameters in parameters_object.analysis_parameters.items():
@@ -41,63 +41,55 @@ def evoked_grand_average():
         # Prepare the different file names for saving:
         evoked_file_name = file_name_generator(save_path_results, parameters_object.files_prefix,
                                                "data-ave", ".fif", data_type="eeg")
-        comp_evo_files_name = str(file_name_generator(save_path_results,
-                                                      parameters_object.files_prefix,
-                                                      "{0}_data-ave", ".fif", data_type="eeg"))
-        joint_files_name = str(file_name_generator(save_path_fig, parameters_object.files_prefix,
-                                                   "{0}_joint", ".png", data_type="eeg"))
-        topo_files_name = str(file_name_generator(save_path_fig, parameters_object.files_prefix,
-                                                  "{0}_topo", ".png", data_type="eeg"))
+        comparison_files_name = str(file_name_generator(save_path_fig, parameters_object.files_prefix,
+                                                        "{0}_compare", ".png", data_type="eeg"))
 
         # Generate the names of the files to load for each subject:
         subjects_results_root = Path(parameters_object.BIDS_root,
-                                     "derivatives", "components", "sub-{0}", "results",
+                                     "derivatives", parameters_object.analysis_name, "sub-{0}", "results",
                                      analysis_name, parameters_object.preprocess_steps)
-        sub_file_prefix = "sub-{0}_task-" + parameters_object.task_name + "_analysis-components_"
+        sub_file_prefix = "sub-{0}_task-" + parameters_object.task_name + "_analysis-" + \
+                          parameters_object.analysis_name
         subject_evoked_file = str(file_name_generator(subjects_results_root,
                                                       sub_file_prefix,
                                                       "data-ave", ".fif", data_type="eeg"))
 
         # ------------------------------------------------------------------------------------------
-        # Load all subjects data:
-        # Listing all the subjects:
-        subjects_list = list_subjects(Path(parameters_object.BIDS_root, "derivatives", "components"))
-        # Loading all subjects evoked data:
-        sub_evo = []
-        for sub in subjects_list:
-            if sub != sub_id:
-                sub_evo.append(mne.read_evokeds(subject_evoked_file.format(sub), verbose='warning')[0])
+        # Load all subjects data and perform grand average per condition
+        # List all subjects:
+        subjects_list = list_subjects(Path(parameters_object.BIDS_root, "derivatives",
+                                           parameters_object.analysis_name))
+        # Loading the data of all subjects per condition:
+        grand_average = {cond: None for cond in analysis_parameters["conditions"]}
+        for cond in analysis_parameters["conditions"]:
+            # Fetch of all participants for the given condition:
+            cond_evoked = []
+            for sub in subjects_list:
+                if sub != sub_id:
+                    cond_evoked.append(mne.read_evokeds(subject_evoked_file.format(sub),
+                                                        verbose='warning', condition=cond))
+            # Performing the grand average for this condition:
+            grand_average[cond] = mne.grand_average(cond_evoked)
+        del cond_evoked
+        # Convert grand average to list for saving:
+        grand_average_list = [grand_average[cond] for cond in grand_average.keys()]
+        mne.write_evokeds(evoked_file_name, grand_average_list)
+        del grand_average_list
 
         # ------------------------------------------------------------------------------------------
-        # Perform grand average and plotting:
-        grand_avg = mne.grand_average(sub_evo)
-        # Save the grand average data:
-        grand_avg.save(evoked_file_name)
-        # Plot the grand average:
-        grand_avg.plot_joint(times="peaks", title="Grand average evoked responses",
-                             show=False, picks=parameters_object.data_type)
-        plt.savefig(joint_files_name.format("all"), transparent=True)
-        plt.close()
-        # Plotting the topomaps:
-        grand_avg.plot_topomap(times="auto", ch_type=parameters_object.data_type, show=False)
-        plt.savefig(topo_files_name.format("all"), transparent=True)
-        plt.close()
-
-        # ------------------------------------------------------------------------------------------
-        # Extract each components data:
-        # Looping through the components:
+        # Extract each components:
         for component in analysis_parameters["components"].keys():
-            comp_evoked = grand_avg.copy().pick(analysis_parameters["components"][component])
-            # Save to file:
-            comp_evoked.save(comp_evo_files_name.format(component))
-            # Plot the joint:
-            comp_evoked.plot_joint(times="peaks", title="Grand average evoked responses", show=False,
-                                   picks=parameters_object.data_type)
-            plt.savefig(joint_files_name.format(component), transparent=True)
-            plt.close()
+            # Create the title:
+            title = " ".join([component, "grand average", " vs ".join([cond for cond in grand_average.keys()]),
+                              "(N-sub={0})".format(len(subjects_list)-1)])
+            # Plotting the comparison for these two conditions:
+            mne.viz.plot_compare_evokeds(grand_average, combine='mean',
+                                         picks=analysis_parameters["components"][component],
+                                         title=title, show=False)
+            plt.savefig(comparison_files_name.format(component), transparent=True)
 
         return None
 
 
 if __name__ == "__main__":
-    evoked_grand_average()
+    population_evoked_comparison()
