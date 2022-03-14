@@ -51,10 +51,9 @@ def evoked_grand_average():
 
         # Generate the names of the files to load for each subject:
         subjects_results_root = Path(parameters_object.BIDS_root,
-                                     "derivatives", parameters_object.analysis_name, "sub-{0}", "results",
+                                     "derivatives", "components", "sub-{0}", "results",
                                      analysis_name, parameters_object.preprocess_steps)
-        sub_file_prefix = "sub-{0}_task-" + parameters_object.task_name + "_analysis-" + \
-                          parameters_object.analysis_name + "_"
+        sub_file_prefix = "sub-{0}_task-" + parameters_object.task_name + "_analysis-components_"
         subject_evoked_file = str(file_name_generator(subjects_results_root,
                                                       sub_file_prefix,
                                                       "data-ave", ".fif", data_type="eeg"))
@@ -62,7 +61,7 @@ def evoked_grand_average():
         # ------------------------------------------------------------------------------------------
         # Load all subjects data:
         # Listing all the subjects:
-        subjects_list = list_subjects(Path(parameters_object.BIDS_root, "derivatives", parameters_object.analysis_name))
+        subjects_list = list_subjects(Path(parameters_object.BIDS_root, "derivatives", "components"))
         # Loading all subjects evoked data:
         sub_evo = []
         for sub in subjects_list:
