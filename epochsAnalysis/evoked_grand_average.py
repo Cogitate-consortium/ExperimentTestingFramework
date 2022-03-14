@@ -54,7 +54,7 @@ def evoked_grand_average():
                                      "derivatives", parameters_object.analysis_name, "sub-{0}", "results",
                                      analysis_name, parameters_object.preprocess_steps)
         sub_file_prefix = "sub-{0}_task-" + parameters_object.task_name + "_analysis-" + \
-                          parameters_object.analysis_name + "_"
+                          parameters_object.analysis_name
         subject_evoked_file = str(file_name_generator(subjects_results_root,
                                                       sub_file_prefix,
                                                       "data-ave", ".fif", data_type="eeg"))
@@ -92,7 +92,9 @@ def evoked_grand_average():
             # Save to file:
             comp_evoked.save(comp_evo_files_name.format(component))
             # Plot the joint:
-            comp_evoked.plot_joint(times="peaks", title="Grand average evoked responses", show=False,
+            comp_evoked.plot_joint(times="peaks",
+                                   title="Grand average evoked responses (N-sub={0})".format(len(subjects_list) - 1),
+                                   show=False,
                                    picks=parameters_object.data_type)
             plt.savefig(joint_files_name.format(component), transparent=True)
             plt.close()
