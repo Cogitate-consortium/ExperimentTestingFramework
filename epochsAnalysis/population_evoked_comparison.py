@@ -60,17 +60,20 @@ def population_evoked_comparison():
         subjects_list = list_subjects(Path(parameters_object.BIDS_root, "derivatives",
                                            parameters_object.analysis_name))
         # Loading the data of all subjects per condition:
+        cond_evoked = {cond: [] for cond in analysis_parameters["conditions"]}
         grand_average = {cond: None for cond in analysis_parameters["conditions"]}
         for cond in analysis_parameters["conditions"]:
             # Fetch of all participants for the given condition:
-            cond_evoked = []
             for sub in subjects_list:
                 if sub != sub_id:
-                    cond_evoked.append(mne.read_evokeds(subject_evoked_file.format(sub),
-                                                        verbose='warning', condition=cond))
+                    cond_evoked[cond].append(mne.read_evokeds(subject_evoked_file.format(sub),
+                                                              verbose='warning', condition=cond))
+                    print("sub-{}".format(sub))
+                    print(len(cond_evoked[cond][-1].ch_names))
+            # Equalize the channels across all instances:
+            mne.equalize_channels(cond_evoked[cond], copy=False, verbose=None)
             # Performing the grand average for this condition:
-            grand_average[cond] = mne.grand_average(cond_evoked)
-        del cond_evoked
+            grand_average[cond] = mne.grand_average(cond_evoked[cond])
         # Convert grand average to list for saving:
         grand_average_list = [grand_average[cond] for cond in grand_average.keys()]
         mne.write_evokeds(evoked_file_name, grand_average_list)
@@ -81,9 +84,9 @@ def population_evoked_comparison():
         for component in analysis_parameters["components"].keys():
             # Create the title:
             title = " ".join([component, "grand average", " vs ".join([cond for cond in grand_average.keys()]),
-                              "(N-sub={0})".format(len(subjects_list)-1)])
+                              "(N-sub={0})".format(len(subjects_list) - 1)])
             # Plotting the comparison for these two conditions:
-            mne.viz.plot_compare_evokeds(grand_average, combine='mean',
+            mne.viz.plot_compare_evokeds(cond_evoked, combine='mean',
                                          picks=analysis_parameters["components"][component],
                                          title=title, show=False)
             plt.savefig(comparison_files_name.format(component), transparent=True)
