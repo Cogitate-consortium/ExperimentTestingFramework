@@ -52,4 +52,4 @@ def batch_runner(bids_root=None, evoked_analysis=True, evoked_comparison=True):
 if __name__ == "__main__":
     batch_runner(
         bids_root="/mnt/beegfs/XNAT/workspace/001_testing_framework/data/bids",
-        evoked_analysis=True, )
+        evoked_analysis=True, evoked_comparison=True)
