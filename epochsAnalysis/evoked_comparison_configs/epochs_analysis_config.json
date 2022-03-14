@@ -13,8 +13,8 @@
       "do_baseline_correction": true,
       "baseline_correction_method": "mean",
       "conditions": {
-        "animate": [],
-        "inanimate": []
+        "animate": [["ham", "tick", "crayfish", "mussel"]],
+        "inanimate": [["sparkler", "knob", "videocassette", "mousepad"]]
       },
       "components": {
         "P1": ["PO3", "POz", "PO4"],
