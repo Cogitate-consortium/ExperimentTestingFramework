@@ -1,5 +1,5 @@
 import argparse
-from paramters_class import EvokedParametersClass
+from parameters_class import AnalysisParametersClass
 from utilities import find_files, baseline_scaling, path_generator, file_name_generator
 from pathlib import Path
 import mne
@@ -23,13 +23,22 @@ def compare_conditions():
     args = parser.parse_args()
 
     # Create the parameters file
-    parameters_object = EvokedParametersClass(args.AnalysisParametersFile, args.subjectID)
+    parameters_object = AnalysisParametersClass("compare_evoked", args.AnalysisParametersFile, args.subjectID)
 
     # Looping through the different analyses configured:
     for analysis_name, analysis_parameters in parameters_object.analysis_parameters.items():
         # ==============================================================================================================
         # Prepare path parameters for saving data and results:
         # ==============================================================================================================
+        # Get the file to be used for this analysis:
+        # Loading the file
+        data_file = find_files(str(Path(parameters_object.input_file_root,
+                                        analysis_parameters["signal"], parameters_object.preprocess_steps)),
+                               naming_pattern="*-epo", extension=".fif")
+        # Adding the input file to the parameters object:
+        parameters_object.input_file = data_file[0]
+
+        # Prepare the path to where the data should be saved:
         save_path_fig = path_generator(parameters_object.save_root,
                                        analysis=analysis_name,
                                        preprocessing_steps=parameters_object.preprocess_steps,
@@ -42,9 +51,11 @@ def compare_conditions():
                                         analysis=analysis_name,
                                         preprocessing_steps=parameters_object.preprocess_steps,
                                         fig=False, results=False, data=True)
+        # Saving the different configs to the different directories:
         parameters_object.save_parameters(save_path_fig)
         parameters_object.save_parameters(save_path_results)
         parameters_object.save_parameters(save_path_data)
+        # prepare the different file names:
         epochs_file_name = file_name_generator(save_path_data, parameters_object.files_prefix,
                                                "data-epo", ".fif", data_type="eeg")
         evoked_file_name = file_name_generator(save_path_results, parameters_object.files_prefix,
@@ -55,10 +66,6 @@ def compare_conditions():
         # ==============================================================================================================
         # Preparing the data:
         # ==============================================================================================================
-        # Loading the file
-        data_file = find_files(str(Path(parameters_object.input_file_root,
-                                        analysis_parameters["signal"], parameters_object.preprocess_steps)),
-                               naming_pattern="*-epo", extension=".fif")
         epochs = mne.read_epochs(data_file[0],
                                  verbose='error', preload=True)
         # Adding the input file to the parameters object:
@@ -89,7 +96,7 @@ def compare_conditions():
         for component in analysis_parameters["components"].keys():
             # Plotting the comparison for these two conditions:
             mne.viz.plot_compare_evokeds(evokeds, combine='mean',
-                                         picks=analysis_parameters["components"][component])
+                                         picks=analysis_parameters["components"][component], show=False)
             plt.savefig(comparison_files_name.format(component), transparent=True)
 
         return None

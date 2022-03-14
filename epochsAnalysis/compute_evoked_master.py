@@ -1,5 +1,5 @@
 import argparse
-from paramters_class import EvokedParametersClass
+from parameters_class import AnalysisParametersClass
 from utilities import find_files, baseline_scaling, path_generator, file_name_generator
 from pathlib import Path
 import mne
@@ -17,7 +17,7 @@ def compute_evoked():
     args = parser.parse_args()
 
     # Create the parameters file
-    parameters_object = EvokedParametersClass(args.AnalysisParametersFile, args.subjectID)
+    parameters_object = AnalysisParametersClass("compute_evoked", args.AnalysisParametersFile, args.subjectID)
 
     # Looping through the different analyses configured:
     for analysis_name, analysis_parameters in parameters_object.analysis_parameters.items():

@@ -1,5 +1,5 @@
 import argparse
-from paramters_class import EvokedParametersClass
+from parameters_class import AnalysisParametersClass
 from utilities import path_generator, file_name_generator, list_subjects
 from pathlib import Path
 import mne
@@ -21,7 +21,7 @@ def evoked_grand_average():
     args = parser.parse_args()
 
     # Create the parameters file
-    parameters_object = EvokedParametersClass(args.AnalysisParametersFile, sub_id)
+    parameters_object = AnalysisParametersClass("compute_evoked", args.AnalysisParametersFile, sub_id)
 
     # Looping through the different analyses configured:
     for analysis_name, analysis_parameters in parameters_object.analysis_parameters.items():
