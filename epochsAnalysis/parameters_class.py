@@ -7,13 +7,13 @@ from pathlib import Path
 from utilities import find_files
 
 
-class EvokedParametersClass:
+class AnalysisParametersClass:
     """
     This class creates the analysis parameters object, based on a json file.
     :return:
     """
 
-    def __init__(self, json_file, sub_id=None):
+    def __init__(self, analysis_name, json_file, sub_id=None):
 
         # Loading the json dict:
         with open(json_file, 'r') as fp:
@@ -45,6 +45,7 @@ class EvokedParametersClass:
 
         # --------------------------------------------------------------------------------------------------------------
         # Getting the analysis parameters
+        self.analysis_name = analysis_name
         self.analysis_parameters = json_dict['analysis_parameters']
 
         # Variable to store which file was taken in
@@ -54,13 +55,13 @@ class EvokedParametersClass:
         self.SUBJ_ID = sub_id
 
         # Setting the root for the produced files:
-        self.save_root = str(Path(self.BIDS_root, "derivatives", "components", "sub-" + self.SUBJ_ID))
+        self.save_root = str(Path(self.BIDS_root, "derivatives", self.analysis_name, "sub-" + self.SUBJ_ID))
         # Adding the root to the input file:
         self.input_file_root = str(Path(self.BIDS_root, "derivatives", "preprocessing", "sub-" + self.SUBJ_ID,
                                         self.data_type, self.preprocessing_folder))
         # Creating the files prefix
         self.files_prefix = "sub-" + self.SUBJ_ID + "_task-" + self.task_name \
-                            + "_analysis-components_"
+                            + "_analysis-" + self.analysis_name
 
     def save_parameters(self, save_path):
         """
@@ -75,7 +76,7 @@ class EvokedParametersClass:
 
         # Setting the full file name:
         full_file = Path(save_path, "sub-" + self.SUBJ_ID + "_ses-" + self.session + "_task-" + self.task_name
-                         + "_desc-" + "visual_responsivness_analysis_parameters.json")
+                         + "_desc-" + "analysis_parameters.json")
         # Dumping to a json file
         with open(full_file, "w") as fp:
             json.dump(obj_dict, fp, indent=4)
