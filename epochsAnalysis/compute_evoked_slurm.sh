@@ -32,4 +32,4 @@ module purge; module load Anaconda3/2020.11; source /hpc/shared/EasyBuild/apps/A
 
 export PYTHONPATH=$PYTHONPATH:/hpc/users/alexander.lepauvre/sw/github/ECoG
 
-python extract_component_master.py --AnalysisParametersFile "${analysis_parameters_file}" --subjectID "${participant_id}"
+python compute_evoked_master.py --AnalysisParametersFile "${analysis_parameters_file}" --subjectID "${participant_id}"
