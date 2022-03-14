@@ -42,7 +42,7 @@ def batch_runner(bids_root=None, evoked_analysis=True, evoked_comparison=True):
             subjects_list = list_subjects(
                 Path(bids_root, "derivatives", "preprocessing"))
             for subject in subjects_list:
-                run_command = "sbatch " + "compute_evoked_slurm.sh" \
+                run_command = "sbatch " + "evoked_comparison_slurm.sh" \
                               + " --analysis_parameters_file=" \
                               + '"{}"'.format(config) \
                               + " --participant_id=" + '"{}"'.format(subject)
