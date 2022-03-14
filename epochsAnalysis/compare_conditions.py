@@ -87,6 +87,9 @@ def compare_conditions():
                             "\nto compare!")
         # Compute the evoked for each condition:
         cond_evoked = {cond: cond_epochs[cond].average() for cond in cond_epochs.keys()}
+        # Adding comments describing the conditions:
+        for cond in cond_evoked.keys():
+            cond_evoked[cond].comment = cond
         # These can now be saved:
         mne.write_evokeds(evoked_file_name, [cond_evoked[cond] for cond in cond_evoked.keys()])
 
