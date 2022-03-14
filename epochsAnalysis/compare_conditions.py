@@ -94,9 +94,13 @@ def compare_conditions():
         evokeds = {cond: list(cond_epochs[cond].iter_evoked()) for cond in cond_epochs.keys()}
         # Looping through the different components:
         for component in analysis_parameters["components"].keys():
+            # Create the title:
+            cond_n_trials = {cond: len(evokeds[cond]) for cond in evokeds}
+            title = " ".join([component, "component", " vs ".join([cond + " (N={0})".format(cond_n_trials[cond])
+                                                                   for cond in cond_n_trials.keys()])])
             # Plotting the comparison for these two conditions:
-            mne.viz.plot_compare_evokeds(evokeds, combine='mean',
-                                         picks=analysis_parameters["components"][component], show=False)
+            mne.viz.plot_compare_evokeds(evokeds, combine='mean', picks=analysis_parameters["components"][component],
+                                         title=title, show=False)
             plt.savefig(comparison_files_name.format(component), transparent=True)
 
         return None
