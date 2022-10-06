@@ -74,7 +74,7 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     scores = cross_val_multiscore(time_decod, data, labels, cv=n_cv, n_jobs=n_jobs)
 
     # Saving the results to file:
-    np.save(scores, Path(results_save_root, "sub-" + subject + "_decoding_scores.npy"))
+    np.save(Path(results_save_root, "sub-" + subject + "_decoding_scores.npy"), scores)
 
     # Average scores across cross-validation splits
     scores = np.mean(scores, axis=0)
@@ -135,8 +135,8 @@ def mvpa_manager():
                                            preprocessing_steps=config["preprocess_steps"],
                                            fig=False, results=True, data=False)
         # Saving the results to file:
-        np.save(scores, Path(results_save_root, "population_decoding_scores.npy"))
         scores = np.array(scores)
+        np.save(scores, Path(results_save_root, "population_decoding_scores.npy"))
         # Compute the mean and ci of the decoding:
         avg, up_ci, low_ci = mean_confidence_interval(scores)
         # Plot the results:
