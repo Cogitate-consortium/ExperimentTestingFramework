@@ -8,25 +8,13 @@ import matplotlib.pyplot as plt
 import mne
 from mne_bids import BIDSPath
 
+from general_utilities.path_helper_function import list_subjects
+
 SUB_LIST = ["01"]
 session = None
 datatype = "eeg"
 task_name = "rsvp"
 relevant_events = "Event/E  1"
-
-
-def list_subjects(root, prefix="sub-"):
-    """
-    This function lists all the "subjects" found in a given folder.
-    :param root: (string or Pathlib object) root to where the subjects are found
-    :param prefix: (string) prefix to the subjects ID
-    :return: (list of strings) list of the subjects ID
-    """
-    list_folders = os.listdir(root)
-    subject_list = [folder.split("-")[1]
-                    for folder in list_folders if prefix in folder]
-
-    return subject_list
 
 
 def check_diff_diff(ts1, ts2, save_root, ts1_name="", ts2_name=""):
