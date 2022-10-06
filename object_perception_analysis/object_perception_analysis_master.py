@@ -140,13 +140,13 @@ def mvpa_manager():
                                            fig=False, results=True, data=False)
         # Saving the results to file:
         scores = np.array(scores)
-        np.save(scores, Path(results_save_root, "population_decoding_scores.npy"))
+        np.save(Path(results_save_root, "population_decoding_scores.npy"), scores)
         # Compute the mean and ci of the decoding:
         avg, up_ci, low_ci = mean_confidence_interval(scores)
         # Plot the results:
         fig, ax = plt.subplots()
-        ax.plot(epochs.times, avg)
-        ax.fill_between(epochs.times, up_ci, low_ci, alpha=.2)
+        ax.plot(avg)
+        ax.fill_between(up_ci, low_ci, alpha=.2)
         ax.axhline(.5, color='k', linestyle='--', label='chance')
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
