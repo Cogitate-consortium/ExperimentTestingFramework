@@ -43,7 +43,7 @@ def compare_simulated_jitters():
 
     # Loop through each set of results:
     fig, ax = plt.subplots()
-    save_root = Path(config["bids_root"], "derivatives", config["analysis"], "jitters_comparison")
+    save_root = Path(config["bids_root"], "derivatives", config["analysis"])
     for key in results.keys():
         avg, low_ci, up_ci = mean_confidence_interval(results[key])
         ax.plot(avg, label=key)
