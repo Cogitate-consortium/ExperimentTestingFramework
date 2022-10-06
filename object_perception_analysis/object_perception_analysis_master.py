@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 from general_utilities.path_helper_function import find_files, list_subjects, path_generator, load_epochs
 from general_utilities.data_helper_function import mean_confidence_interval
+from general_utilities.jitter_simulation import generate_jitter
 
 
 def single_subject_mvpa(subject, epochs, config, conditions=None, labels_condition=None, classifier="svm", n_cv=5,
@@ -49,6 +50,9 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     # Prepare the data:
     if conditions is not None:
         epochs = epochs[conditions]
+    # Mess the triggers timing if needed:
+    if config["trigger_jitter_parameter"] is not None:
+        epochs = generate_jitter(epochs, **config["trigger_jitter_parameter"])
     # Extract the data:
     data = np.squeeze(epochs.get_data())
     # Extract the labels:
@@ -81,7 +85,7 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     # Plot the results:
     fig, ax = plt.subplots()
     ax.plot(epochs.times, scores, label='score')
-    ax.axhline(.5, color='k', linestyle='--', label='chance')
+    ax.axhline(1/len(np.unique(labels)), color='k', linestyle='--', label='chance')
     ax.set_xlabel('Times')
     ax.set_ylabel('Accuracy')  # Area Under the Curve
     ax.legend()

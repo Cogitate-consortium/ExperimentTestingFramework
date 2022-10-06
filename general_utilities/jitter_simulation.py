@@ -20,21 +20,18 @@ def generate_jitter(epochs, jitter_amp_ms=16, trials_proportion=0.1):
 
     # Get the data:
     data = epochs.get_data()
+    data_new = np.zeros((data.shape[0], data.shape[1], data.shape[2] - jitter_samp))
     # Randomly pick trials for which to mess up the timing:
     trials_ind = np.random.randint(0, high=data.shape[0], size=int(trials_proportion * data.shape[0]))
     # For these trials, removing n samples from the beginning:
-    data_jitter = data[trials_ind, :, jitter_samp:]
-    data_no_jitter_corrected = data[~trials_ind, :, :-jitter_samp]
-    assert data_jitter.shape[-1] == data_no_jitter_corrected.shape[-1], "The shape between the data in which a jitter " \
-                                                                        "was introduced does not match with the shape " \
-                                                                        "of the data where no trigger was added!"
-
-    # Combine the two matrices:
-    data = np.concatenate(data_jitter, data_no_jitter_corrected)
+    data_new[trials_ind, :, :] = data[trials_ind, :, jitter_samp:]
+    mask = np.ones(data.shape[0], bool)
+    mask[trials_ind] = False
+    data_new[mask, :, :] = data[mask, :, :-jitter_samp]
 
     # Recreate the epoch object:
     metadata = epochs.metadata
-    epochs = mne.EpochsArray(data, epochs.info, tmin=0, events=epochs.events, event_id=epochs.event_dict)
+    epochs = mne.EpochsArray(data_new, epochs.info, tmin=epochs.times[0], events=epochs.events, event_id=epochs.event_id)
     epochs.metadata = metadata
     return epochs
 

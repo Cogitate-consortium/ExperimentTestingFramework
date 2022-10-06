@@ -8,9 +8,13 @@
   "signal": "erp",
   "analysis": "mvpa",
   "name": "category_svm",
-  "conditions": null,
+  "conditions": ["human_face", "inanimate_object"],
   "labels_condition": "category",
   "classifier": "svm",
   "n_cv": 5,
-  "n_jobs": 2
+  "n_jobs": 2,
+  "trigger_jitter_parameter": {
+    "jitter_amp_ms": 16,
+    "trials_proportion": 0.1
+  }
 }
