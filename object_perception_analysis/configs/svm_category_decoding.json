@@ -1,0 +1,13 @@
+{
+  "bids_root": "",
+  "session": "1",
+  "data_type": "eeg",
+  "task_name": "object_processing",
+  "preprocessing_folder": "epoching",
+  "preprocess_steps": "unknown",
+  "signal": "erp",
+  "conditions": null,
+  "labels_condition": "category",
+  "classifier_svm": "svm",
+  "n_cv": 5
+}
