@@ -48,7 +48,7 @@ def compare_simulated_jitters():
         avg, low_ci, up_ci = mean_confidence_interval(results[key])
         ax.plot(avg, label=key)
         ax.fill_between(up_ci, low_ci, alpha=.2)
-        ax.axhline(.5, color='k', linestyle='--', label='chance')
+        ax.axhline(.5, color='k', linestyle='--')
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
     ax.legend()
