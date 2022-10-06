@@ -7,7 +7,7 @@
   "preprocess_steps": "unknown",
   "signal": "erp",
   "analysis": "mvpa",
-  "name": "category_svm",
+  "name": "category_svm_jitter_16ms_40perc",
   "conditions": ["human_face", "inanimate_object"],
   "labels_condition": "category",
   "classifier": "svm",
