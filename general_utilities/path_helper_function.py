@@ -82,7 +82,8 @@ def path_generator(root, analysis=None, preprocessing_steps=None, fig=False, res
 
 def load_epochs(bids_root, subject, session, data_type, preprocessing_folder, signal, preprocessing_steps, task):
     # Generate file name:
-    epoch_file = Path(bids_root, "derivatives", "preprocessing", subject, session, data_type,
+    epoch_file = Path(bids_root, "derivatives", "preprocessing", "sub-" + subject, "ses-" + session, data_type,
                       preprocessing_folder, signal, preprocessing_steps,
-                      "{}_{}_task-{}_desc-epoching_{}-epo.fif".format(subject, session, task, data_type))
+                      "sub-{}_ses-{}_task-{}_desc-epoching_{}-epo.fif".format(subject, session, task, data_type))
+    # Return the read epochs:
     return mne.read_epochs(epoch_file)

@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 from general_utilities.path_helper_function import find_files, list_subjects, path_generator, load_epochs
 
 
-def single_subject_mvpa(subject, epochs, config, conditions=None, labels_condition=None, classifier="svm", n_cv=5):
+def single_subject_mvpa(subject, epochs, config, conditions=None, labels_condition=None, classifier="svm", n_cv=5,
+                        n_jobs=8):
     """
 
     :param subject:
@@ -26,6 +27,7 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     :param labels_condition:
     :param classifier:
     :param n_cv:
+    :param n_jobs:
     :return:
     """
     # =========================================================================================
@@ -67,9 +69,9 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
         raise Exception("The classifier passed was not recogized! Only SVM or logisticregression supported")
 
     # Performing the decoding in a time resolved fashion:
-    time_decod = SlidingEstimator(clf, n_jobs=1, scoring='accuracy', verbose=True)
+    time_decod = SlidingEstimator(clf, n_jobs=n_jobs, scoring='accuracy', verbose=True)
     # Scoring the classifier:
-    scores = cross_val_multiscore(time_decod, data, labels, cv=n_cv, n_jobs=4)
+    scores = cross_val_multiscore(time_decod, data, labels, cv=n_cv, n_jobs=n_jobs)
 
     # Saving the results to file:
     np.save(scores, Path(fig_save_root, "sub-" + subject + "_decoding_scores.npy"))
@@ -113,15 +115,16 @@ def mvpa_manager():
         scores = []
         for subject in subjects_list:
             # Load this subject epochs:
-            epochs = load_epochs(config["bids_root"], "sub-" + subject,
-                                 "ses-" + config["ses"], config["data_type"], config["preprocess_folder"],
+            epochs = load_epochs(config["bids_root"], subject,
+                                 config["ses"], config["data_type"], config["preprocess_folder"],
                                  config["signal"], config["preprocess_steps"], config["task"])
             # Run the decoding on this subject:
             scores.append(single_subject_mvpa(subject, epochs, config,
                                               conditions=config["conditions"],
                                               labels_condition=config["labels_condition"],
                                               classifier=config["classifier"],
-                                              n_cv=config["n_cv"]))
+                                              n_cv=config["n_cv"],
+                                              n_jobs=config["n_jobs"]))
 
 
 if __name__ == "__main__":
