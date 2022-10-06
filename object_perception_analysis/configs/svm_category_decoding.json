@@ -12,5 +12,5 @@
   "labels_condition": "category",
   "classifier": "svm",
   "n_cv": 5,
-  "n_jobs": 4
+  "n_jobs": 2
 }

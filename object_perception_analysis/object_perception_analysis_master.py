@@ -2,7 +2,6 @@ import argparse
 from pathlib import Path
 import os
 import json
-import mne
 import numpy as np
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -14,6 +13,7 @@ from mne.decoding import (SlidingEstimator, GeneralizingEstimator, Scaler,
 import matplotlib.pyplot as plt
 
 from general_utilities.path_helper_function import find_files, list_subjects, path_generator, load_epochs
+from general_utilities.data_helper_function import mean_confidence_interval
 
 
 def single_subject_mvpa(subject, epochs, config, conditions=None, labels_condition=None, classifier="svm", n_cv=5,
@@ -74,7 +74,7 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     scores = cross_val_multiscore(time_decod, data, labels, cv=n_cv, n_jobs=n_jobs)
 
     # Saving the results to file:
-    np.save(scores, Path(fig_save_root, "sub-" + subject + "_decoding_scores.npy"))
+    np.save(scores, Path(results_save_root, "sub-" + subject + "_decoding_scores.npy"))
 
     # Average scores across cross-validation splits
     scores = np.mean(scores, axis=0)
@@ -125,6 +125,32 @@ def mvpa_manager():
                                               classifier=config["classifier"],
                                               n_cv=config["n_cv"],
                                               n_jobs=config["n_jobs"]))
+
+        # Generate the path to save the population results:
+        save_root = Path(config["bids_root"], "derivatives", config["analysis"], "population")
+        fig_save_root = path_generator(save_root, analysis=config["name"],
+                                       preprocessing_steps=config["preprocess_steps"],
+                                       fig=True, results=False, data=False)
+        results_save_root = path_generator(save_root, analysis=config["name"],
+                                           preprocessing_steps=config["preprocess_steps"],
+                                           fig=False, results=True, data=False)
+        # Saving the results to file:
+        np.save(scores, Path(results_save_root, "population_decoding_scores.npy"))
+        scores = np.array(scores)
+        # Compute the mean and ci of the decoding:
+        avg, up_ci, low_ci = mean_confidence_interval(scores)
+        # Plot the results:
+        fig, ax = plt.subplots()
+        ax.plot(epochs.times, avg)
+        ax.fill_between(epochs.times, up_ci, low_ci, alpha=.2)
+        ax.axhline(.5, color='k', linestyle='--', label='chance')
+        ax.set_xlabel('Times')
+        ax.set_ylabel('Accuracy')  # Area Under the Curve
+        ax.legend()
+        ax.axvline(.0, color='k', linestyle='-')
+        ax.set_title('Population decoding')
+        # Save the figure to a file:
+        plt.savefig(Path(fig_save_root, "population" + "_decoding_scores.png"))
 
 
 if __name__ == "__main__":
