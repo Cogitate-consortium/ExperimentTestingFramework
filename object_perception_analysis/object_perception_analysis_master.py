@@ -20,15 +20,21 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     """
 
     :param subject:
+    :param epochs:
     :param config:
+    :param conditions:
+    :param labels_condition:
+    :param classifier:
+    :param n_cv:
     :return:
     """
     # =========================================================================================
     # Housekeeping
-    fig_save_root = path_generator(config["save_root"].format(subject), analysis=config["name"],
+    save_root = Path(config["bids_root"], "derivatives", config["analysis"], "sub-" + subject)
+    fig_save_root = path_generator(save_root, analysis=config["name"],
                                    preprocessing_steps=config["preprocess_steps"],
                                    fig=True, results=False, data=False)
-    results_save_root = path_generator(config["save_root"].format(subject), analysis=config["name"],
+    results_save_root = path_generator(save_root, analysis=config["name"],
                                        preprocessing_steps=config["preprocess_steps"],
                                        fig=False, results=True, data=False)
     # Saving the config where the data will be saved:
@@ -63,10 +69,10 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     # Performing the decoding in a time resolved fashion:
     time_decod = SlidingEstimator(clf, n_jobs=1, scoring='accuracy', verbose=True)
     # Scoring the classifier:
-    scores = cross_val_multiscore(time_decod, data, labels, cv=n_cv, n_jobs=1)
+    scores = cross_val_multiscore(time_decod, data, labels, cv=n_cv, n_jobs=4)
 
     # Saving the results to file:
-    scores.save(Path(fig_save_root, "sub-" + subject + "_decoding_scores.npy"))
+    np.save(scores, Path(fig_save_root, "sub-" + subject + "_decoding_scores.npy"))
 
     # Average scores across cross-validation splits
     scores = np.mean(scores, axis=0)
@@ -98,8 +104,8 @@ def mvpa_manager():
     # Looping through all config:
     for config in configs:
         # Load the config:
-        config_file = open(config)
-        config = json.loads(config_file)[0]
+        with open(config) as f:
+            config = json.load(f)
         # List the subjects:
         subjects_list = list_subjects(Path(config["bids_root"], "derivatives", "preprocessing"), prefix="sub-")
 

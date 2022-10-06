@@ -1,13 +1,15 @@
 {
-  "bids_root": "",
-  "session": "1",
+  "bids_root": "C:\\Users\\alexander.lepauvre\\Documents\\PhD\\Experimental_testing_framework\\data\\object_processing\\bids",
+  "ses": "1",
   "data_type": "eeg",
-  "task_name": "object_processing",
-  "preprocessing_folder": "epoching",
+  "task": "object_processing",
+  "preprocess_folder": "epoching",
   "preprocess_steps": "unknown",
   "signal": "erp",
-  "conditions": null,
+  "analysis": "mvpa",
+  "name": "category_svm",
+  "conditions": ["human_face", "inanimate_object"],
   "labels_condition": "category",
-  "classifier_svm": "svm",
+  "classifier": "svm",
   "n_cv": 5
 }

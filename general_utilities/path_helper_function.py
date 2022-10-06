@@ -84,5 +84,5 @@ def load_epochs(bids_root, subject, session, data_type, preprocessing_folder, si
     # Generate file name:
     epoch_file = Path(bids_root, "derivatives", "preprocessing", subject, session, data_type,
                       preprocessing_folder, signal, preprocessing_steps,
-                      "sub-{}_ses-{}_task-{}_desc-epoching_{}-epo.fif".format(subject, session, task, data_type))
+                      "{}_{}_task-{}_desc-epoching_{}-epo.fif".format(subject, session, task, data_type))
     return mne.read_epochs(epoch_file)
