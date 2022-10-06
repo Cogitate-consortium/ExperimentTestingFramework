@@ -152,6 +152,8 @@ def mvpa_manager():
         # Save the figure to a file:
         plt.savefig(Path(fig_save_root, "population" + "_decoding_scores.png"))
 
+        print("DONE!")
+
 
 if __name__ == "__main__":
     mvpa_manager()
