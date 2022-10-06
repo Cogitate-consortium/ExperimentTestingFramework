@@ -142,7 +142,7 @@ def mvpa_manager():
         scores = np.array(scores)
         np.save(Path(results_save_root, "population_decoding_scores.npy"), scores)
         # Compute the mean and ci of the decoding:
-        avg, up_ci, low_ci = mean_confidence_interval(scores)
+        avg, low_ci, up_ci = mean_confidence_interval(scores)
         # Plot the results:
         fig, ax = plt.subplots()
         ax.plot(avg)
