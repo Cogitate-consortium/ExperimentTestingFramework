@@ -10,6 +10,7 @@ from sklearn.svm import LinearSVC
 from mne.decoding import (SlidingEstimator, GeneralizingEstimator, Scaler,
                           cross_val_multiscore, LinearModel, get_coef,
                           Vectorizer, CSP)
+from sklearn.feature_selection import SelectKBest, f_classif
 import matplotlib.pyplot as plt
 
 from general_utilities.path_helper_function import find_files, list_subjects, path_generator, load_epochs
@@ -18,7 +19,7 @@ from general_utilities.jitter_simulation import generate_jitter
 
 
 def single_subject_mvpa(subject, epochs, config, conditions=None, labels_condition=None, classifier="svm", n_cv=5,
-                        n_jobs=8):
+                        n_features=30, n_jobs=8):
     """
 
     :param subject:
@@ -62,11 +63,13 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     if classifier.lower() == "svm":
         clf = make_pipeline(
             StandardScaler(),
+            SelectKBest(f_classif, k=n_features),
             LinearSVC()
         )
     elif classifier.lower() == "logisticregression":
         clf = make_pipeline(
             StandardScaler(),
+            SelectKBest(f_classif, k=n_features),
             LogisticRegression(solver='liblinear')
         )
     else:
@@ -128,7 +131,8 @@ def mvpa_manager():
                                               labels_condition=config["labels_condition"],
                                               classifier=config["classifier"],
                                               n_cv=config["n_cv"],
-                                              n_jobs=config["n_jobs"]))
+                                              n_jobs=config["n_jobs"],
+                                              n_features=config["n_features"]))
 
         # Generate the path to save the population results:
         save_root = Path(config["bids_root"], "derivatives", config["analysis"], "population")
@@ -147,11 +151,9 @@ def mvpa_manager():
         fig, ax = plt.subplots()
         ax.plot(avg)
         ax.fill_between(up_ci, low_ci, alpha=.2)
-        ax.axhline(.5, color='k', linestyle='--', label='chance')
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
         ax.legend()
-        ax.axvline(.0, color='k', linestyle='-')
         ax.set_title('Population decoding')
         # Save the figure to a file:
         plt.savefig(Path(fig_save_root, "population" + "_decoding_scores.png"))
