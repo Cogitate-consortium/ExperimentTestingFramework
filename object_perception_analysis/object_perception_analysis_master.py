@@ -183,7 +183,7 @@ def mvpa_manager():
         fig, ax = plt.subplots()
         for label in population_scores.keys():
             # Compute the mean and ci of the decoding:
-            avg, low_ci, up_ci = mean_confidence_interval(scores)
+            avg, low_ci, up_ci = mean_confidence_interval(population_scores[label])
             ax.plot(avg, label=label)
             ax.fill_between(up_ci, low_ci, alpha=.2)
         ax.set_xlabel('Times')
