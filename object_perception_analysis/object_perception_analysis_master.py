@@ -15,11 +15,38 @@ from mne.decoding import (SlidingEstimator, GeneralizingEstimator, Scaler,
                           cross_val_multiscore, LinearModel, get_coef,
                           Vectorizer, CSP)
 from sklearn.feature_selection import SelectKBest, f_classif
+from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
 
 from general_utilities.path_helper_function import find_files, list_subjects, path_generator, load_epochs
 from general_utilities.data_helper_function import mean_confidence_interval
 from general_utilities.jitter_simulation import generate_jitter
+
+
+def classification_wrapper(data, y, clf, train_index, test_index, n_sample_window=6, n_sample_steps=3):
+    print("Training and testing classifier")
+    labels = list(set(y))
+    sample_ctr = 0
+    res_mat = np.zeros((len(labels), len(labels),
+                                   np.arange(0, data.shape[-1] - n_sample_window + 1,
+                                             n_sample_steps).shape[0]))
+    # Looping through the time windows:
+    for i in range(0, data.shape[-1] - n_sample_window + 1, n_sample_steps):
+        x_train, x_test = data[train_index, :, i:i + n_sample_window], \
+                          data[test_index, :, i:i + n_sample_window]
+        y_train, y_test = y[train_index], y[test_index]
+        # Reshape the x arays:
+        x_train, x_test = x_train.reshape(x_train.shape[0], -1), x_test.reshape(x_test.shape[0], -1)
+        # Fit the classifier on the train data:
+        clf.fit(X=x_train, y=y_train)
+        # Predict:
+        y_pred = clf.predict(x_test)
+        # Generate a confusion matrix:
+        res_mat[:, :, sample_ctr] = confusion_matrix(y_test, y_pred,
+                                                                labels=labels, normalize="true")
+        sample_ctr += 1
+
+    return res_mat
 
 
 def single_subject_mvpa(subject, epochs, config, conditions=None, labels_condition=None, classifier="svm", n_cv=5,
@@ -89,30 +116,15 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
                                    np.arange(0, data.shape[-1] - config["n_sample_window"] + 1,
                                              config["n_sample_steps"]).shape[0],
                                    n_cv))
-    fold_ctr = 0
     # Looping through folds:
-    for train_index, test_index in skf.split(data, y):
-        print("Training and testing classifier")
-        print("Fold: {}".format(fold_ctr + 1))
-        sample_ctr = 0
-        # Looping through the time windows:
-        for i in range(0, data.shape[-1] - config["n_sample_window"] + 1, config["n_sample_steps"]):
-            x_train, x_test = data[train_index, :, i:i + config["n_sample_window"]], \
-                              data[test_index, :, i:i + config["n_sample_window"]]
-            y_train, y_test = y[train_index], y[test_index]
-            # Reshape the x arays:
-            x_train, x_test = x_train.reshape(x_train.shape[0], -1), x_test.reshape(x_test.shape[0], -1)
-            # Fit the classifier on the train data:
-            clf.fit(X=x_train, y=y_train)
-            # Predict:
-            y_pred = clf.predict(x_test)
-            # Generate a confusion matrix:
-            confusion_matrices[:, :, sample_ctr, fold_ctr] = confusion_matrix(y_test, y_pred,
-                                                                              labels=labels, normalize="true")
-            sample_ctr += 1
-        fold_ctr += 1
+    confusion_matrices = Parallel(n_jobs=n_jobs)(delayed(classification_wrapper)(
+        data, y, clf, train_index, test_index,
+        n_sample_window=config["n_sample_window"],
+        n_sample_steps=config["n_sample_steps"]
+    ) for train_index, test_index in skf.split(data, y))
+
     # Average across the CV:
-    confusion_matrices = np.mean(confusion_matrices, axis=-1)
+    confusion_matrices = np.mean(np.array(confusion_matrices), axis=0)
     # Loop through the labels:
     scores = {}
     for ind, label in enumerate(labels):
