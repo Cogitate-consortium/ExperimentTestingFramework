@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 import os
 import json
-import itertools
+import pickle
 import numpy as np
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -11,16 +11,15 @@ from sklearn.svm import LinearSVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import confusion_matrix
-from mne.decoding import (SlidingEstimator, GeneralizingEstimator, Scaler,
-                          cross_val_multiscore, LinearModel, get_coef,
-                          Vectorizer, CSP)
-from sklearn.feature_selection import SelectKBest, f_classif
 from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from general_utilities.path_helper_function import find_files, list_subjects, path_generator, load_epochs
 from general_utilities.data_helper_function import mean_confidence_interval
 from general_utilities.jitter_simulation import generate_jitter
+
+colors = sns.color_palette("colorblind")
 
 
 def classification_wrapper(data, y, clf, train_index, test_index, n_sample_window=6, n_sample_steps=3):
@@ -198,18 +197,18 @@ def mvpa_manager():
         population_scores = {key: None for key in scores[0].keys()}
         for label in population_scores.keys():
             population_scores[label] = np.array([score[label] for score in scores])
-            np.save(Path(results_save_root, "sub-population_"
-                         + label + "_decoding_scores.npy"), population_scores[label])
-
+        # Save the results to file:
+        with open(Path(results_save_root, "sub-population_decoding_scores.pkl"), 'wb'):
+            pickle.dump(population_scores, f)
         # Plot the results:
         fig, ax = plt.subplots()
-        for label in population_scores.keys():
+        for ind, label in enumerate(population_scores.keys()):
             # Compute the mean and ci of the decoding:
             avg, low_ci, up_ci = mean_confidence_interval(population_scores[label])
             times = np.linspace(t0, tmax, num=avg.shape[0])
-            ax.scatter(times, avg)
-            ax.plot(times, avg, label=label, linewidth=0.5)
-            ax.fill_between(times, low_ci, up_ci, alpha=.2)
+            ax.scatter(times, avg, c=colors[ind])
+            ax.plot(times, avg, label=label, linewidth=0.5, colors=colors[ind])
+            ax.fill_between(times, low_ci, up_ci, alpha=.2, facecolor=colors[ind])
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
         ax.legend()
