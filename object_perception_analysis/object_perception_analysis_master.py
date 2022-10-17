@@ -85,8 +85,8 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     labels = list(set(y))
     # Perform cross validation:
     skf = StratifiedKFold(n_splits=n_cv)
-    confusion_matrices = np.zeros((len(labels), len(labels), 0,
-                                   np.arange(data.shape[-1] - config["n_sample_window"] + 1,
+    confusion_matrices = np.zeros((len(labels), len(labels),
+                                   np.arange(0, data.shape[-1] - config["n_sample_window"] + 1,
                                              config["n_sample_steps"]).shape[0],
                                    n_cv))
     fold_ctr = 0
