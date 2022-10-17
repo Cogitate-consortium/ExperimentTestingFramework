@@ -11,6 +11,8 @@
   "conditions": ["human_face", "human_face", "animal_body", "animal_face", "fruit_vegetable", "inanimate_object"],
   "labels_condition": "category",
   "classifier": "lda",
+  "n_sample_window": 6,
+  "n_sample_steps": 3,
   "n_cv": 10,
   "n_features": 30,
   "n_jobs": 8,
