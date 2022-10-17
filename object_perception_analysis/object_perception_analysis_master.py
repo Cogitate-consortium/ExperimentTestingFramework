@@ -27,8 +27,8 @@ def classification_wrapper(data, y, clf, train_index, test_index, n_sample_windo
     labels = list(set(y))
     sample_ctr = 0
     res_mat = np.zeros((len(labels), len(labels),
-                                   np.arange(0, data.shape[-1] - n_sample_window + 1,
-                                             n_sample_steps).shape[0]))
+                        np.arange(0, data.shape[-1] - n_sample_window + 1,
+                                  n_sample_steps).shape[0]))
     # Looping through the time windows:
     for i in range(0, data.shape[-1] - n_sample_window + 1, n_sample_steps):
         x_train, x_test = data[train_index, :, i:i + n_sample_window], \
@@ -42,7 +42,7 @@ def classification_wrapper(data, y, clf, train_index, test_index, n_sample_windo
         y_pred = clf.predict(x_test)
         # Generate a confusion matrix:
         res_mat[:, :, sample_ctr] = confusion_matrix(y_test, y_pred,
-                                                                labels=labels, normalize="true")
+                                                     labels=labels, normalize="true")
         sample_ctr += 1
 
     return res_mat
@@ -111,10 +111,6 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     labels = list(set(y))
     # Perform cross validation:
     skf = StratifiedKFold(n_splits=n_cv)
-    confusion_matrices = np.zeros((len(labels), len(labels),
-                                   np.arange(0, data.shape[-1] - config["n_sample_window"] + 1,
-                                             config["n_sample_steps"]).shape[0],
-                                   n_cv))
     # Looping through folds:
     confusion_matrices = Parallel(n_jobs=n_jobs)(delayed(classification_wrapper)(
         data, y, clf, train_index, test_index,
@@ -208,7 +204,7 @@ def mvpa_manager():
             times = np.linspace(t0, tmax, num=avg.shape[0])
             ax.scatter(times, avg, c=colors[ind])
             ax.plot(times, avg, label=label, linewidth=0.5, color=colors[ind])
-            ax.fill_between(times, low_ci, up_ci, alpha=.2, facecolor=colors[ind])
+            # ax.fill_between(times, low_ci, up_ci, alpha=.2, facecolor=colors[ind])
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
         ax.legend()
