@@ -156,11 +156,14 @@ def mvpa_manager():
 
         # Looping through each subject to launch the analysis across all:
         scores = []
+        t0 = None
+        tmax = None
         for subject in subjects_list:
             # Load this subject epochs:
             epochs = load_epochs(config["bids_root"], subject,
                                  config["ses"], config["data_type"], config["preprocess_folder"],
                                  config["signal"], config["preprocess_steps"], config["task"])
+            t0, tmax = epochs.times[0], epochs.times[-1]
             # Run the decoding on this subject:
             scores.append(single_subject_mvpa(subject, epochs, config,
                                               conditions=config["conditions"],
@@ -190,8 +193,10 @@ def mvpa_manager():
         for label in population_scores.keys():
             # Compute the mean and ci of the decoding:
             avg, low_ci, up_ci = mean_confidence_interval(population_scores[label])
-            ax.plot(avg, label=label)
-            ax.fill_between(up_ci, low_ci, alpha=.2)
+            times = np.linspace(t0, tmax, num=avg.shape[0])
+            ax.scatter(times, avg)
+            ax.plot(times, avg, label=label, linewidth=0.5)
+            ax.fill_between(times, low_ci, up_ci, alpha=.2)
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
         ax.legend()
