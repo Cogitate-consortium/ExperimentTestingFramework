@@ -123,7 +123,8 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     # Plot the results:
     fig, ax = plt.subplots()
     for label in scores.keys():
-        ax.plot(epochs.times, scores[label], label=label)
+        times = np.linspace(epochs.times[0], epochs.times[-1], num=scores[label].shape[0])
+        ax.plot(times, scores[label], label=label)
     ax.axhline(1 / len(labels), color='k', linestyle='--', label='chance')
     ax.set_xlabel('Times')
     ax.set_ylabel('Accuracy')  # Area Under the Curve
