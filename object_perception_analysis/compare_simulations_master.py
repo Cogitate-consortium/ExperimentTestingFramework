@@ -2,19 +2,13 @@ import argparse
 from pathlib import Path
 import os
 import json
+import pickle
 import numpy as np
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import LinearSVC
-from mne.decoding import (SlidingEstimator, GeneralizingEstimator, Scaler,
-                          cross_val_multiscore, LinearModel, get_coef,
-                          Vectorizer, CSP)
+import pandas as pd
 import matplotlib.pyplot as plt
 
-from general_utilities.path_helper_function import find_files, list_subjects, path_generator, load_epochs
+from general_utilities.path_helper_function import find_files, path_generator
 from general_utilities.data_helper_function import mean_confidence_interval
-from general_utilities.jitter_simulation import generate_jitter
 
 
 def compare_simulated_jitters():
@@ -28,6 +22,7 @@ def compare_simulated_jitters():
         configs = [args.config]
 
     results = {}
+    configs_df = pd.DataFrame()
     # Looping through all config:
     for config in configs:
         # Load the config:
@@ -39,23 +34,68 @@ def compare_simulated_jitters():
         results_save_root = path_generator(save_root, analysis=config["name"],
                                            preprocessing_steps=config["preprocess_steps"],
                                            fig=False, results=True, data=False)
-        results[config["name"]] = np.load(Path(results_save_root, "population_decoding_scores.npy"))
+        with open(Path(results_save_root, "sub-population_decoding_scores.pkl"), 'wb') as f:
+            results[config["name"]] = pickle.load(f)
+        # Get the maximal decoding values observed:
+        max_decoding = np.max([np.max(results[config["name"]][key]) for key in config["name"].keys()])
+        # Extract the config relevant info as a dataframe:
+        configs_df = pd.append(pd.DataFrame({
+            "name": config["name"],
+            "jitter_amp_ms": config["trigger_jitter_parameter"]["jitter_amp_ms"],
+            "trials_proportion": config["trigger_jitter_parameter"]["trials_proportion"],
+            "max_decoding": max_decoding
+        }, index=[0]))
+    configs_df = configs_df.reset_index(drop=True)
 
-    # Loop through each set of results:
-    fig, ax = plt.subplots()
+    # =======================================================================
+    # 1. Plot the decoding results averaged across labels:
     save_root = Path(config["bids_root"], "derivatives", config["analysis"])
-    for key in results.keys():
-        avg, low_ci, up_ci = mean_confidence_interval(results[key])
+    fig, ax = plt.subplots()
+    for ind, key in enumerate(results.keys()):
+        # Average across all the different labels:
+        data = np.mean(np.array([results[key][label] for label in results[key].keys()]), axis=0)
+        avg, low_ci, up_ci = mean_confidence_interval(data)
         ax.plot(avg, label=key)
-        ax.fill_between(up_ci, low_ci, alpha=.2)
-        ax.axhline(.5, color='k', linestyle='--')
+        ax.fill_between(range(avg.shape[-1]), up_ci, low_ci, alpha=.2)
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
     ax.legend()
     ax.axvline(.0, color='k', linestyle='-')
-    ax.set_title('Population decoding')
+    ax.set_title('Average decoding accuracy')
     # Save the figure to a file:
-    plt.savefig(Path(save_root, "population" + "_decoding_scores.png"))
+    plt.savefig(Path(save_root, "average_decoding_scores.png"))
+
+    # =======================================================================
+    # 2. Plot the decoding results separately for each label:
+    labels = list(results[list(results.keys())[0]].keys())
+    for label in labels:
+        fig, ax = plt.subplots()
+        for ind, key in enumerate(results.keys()):
+            # Average across all the different labels:
+            avg, low_ci, up_ci = mean_confidence_interval(results[key][label])
+            ax.plot(avg, label=key)
+            ax.fill_between(range(avg.shape[-1]), up_ci, low_ci, alpha=.2)
+            ax.set_xlabel('Times')
+            ax.set_ylabel('Accuracy')  # Area Under the Curve
+        ax.legend()
+        ax.axvline(.0, color='k', linestyle='-')
+        ax.set_title('{} decoding accuracy'.format(label))
+        # Save the figure to a file:
+        plt.savefig(Path(save_root, "{}_decoding_scores.png".format(label)))
+
+    # =======================================================================
+    # 3. Plotting the max decoding accuracy as a function of proportion of jitter separately for each jitter duration:
+    for jitter_dur in configs_df["jitter_amp_ms"].unique():
+        # Extract only the relevant data:
+        jitter_dur_df = configs_df.loc[configs_df["jitter_amp_ms"] == jitter_dur]
+        # Plot the max decoding accuracy as a function of proportion of trials affected:
+        fig, ax = plt.subplots()
+        ax.scatter(jitter_dur_df["trials_proportion"], jitter_dur_df["max_decoding"])
+        ax.plot(jitter_dur_df["trials_proportion"], jitter_dur_df["max_decoding"])
+        ax.set_xlabel('Trials proportion')
+        ax.set_ylabel('Peak accuracy')
+        # Save the figure to a file:
+        plt.savefig(Path(save_root, "{}ms_peak_decoding_scores.png".format(jitter_dur)))
 
     print("DONE!")
 
