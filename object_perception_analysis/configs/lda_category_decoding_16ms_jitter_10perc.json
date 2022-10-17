@@ -7,15 +7,15 @@
   "preprocess_steps": "unknown",
   "signal": "erp",
   "analysis": "mvpa",
-  "name": "category_svm_jitter_16ms_30perc",
+  "name": "category_svm_jitter_16ms_10perc",
   "conditions": ["human_face", "inanimate_object"],
   "labels_condition": "category",
-  "classifier": "svm",
+  "classifier": "lda",
   "n_cv": 10,
   "n_features": 30,
   "n_jobs": 8,
   "trigger_jitter_parameter": {
     "jitter_amp_ms": 16,
-    "trials_proportion": 0.3
+    "trials_proportion": 0.1
   }
 }

@@ -2,11 +2,15 @@ import argparse
 from pathlib import Path
 import os
 import json
+import itertools
 import numpy as np
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import confusion_matrix
 from mne.decoding import (SlidingEstimator, GeneralizingEstimator, Scaler,
                           cross_val_multiscore, LinearModel, get_coef,
                           Vectorizer, CSP)
@@ -54,10 +58,6 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     # Mess the triggers timing if needed:
     if config["trigger_jitter_parameter"] is not None:
         epochs = generate_jitter(epochs, **config["trigger_jitter_parameter"])
-    # Extract the data:
-    data = np.squeeze(epochs.get_data())
-    # Extract the labels:
-    labels = epochs.metadata[labels_condition].to_numpy()
 
     # Prepare the classifier:
     if classifier.lower() == "svm":
@@ -72,23 +72,53 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
             SelectKBest(f_classif, k=n_features),
             LogisticRegression(solver='liblinear')
         )
+    elif classifier.lower() == "lda":
+        clf = make_pipeline(
+            StandardScaler(),
+            SelectKBest(f_classif, k=n_features),
+            LinearDiscriminantAnalysis()
+        )
     else:
         raise Exception("The classifier passed was not recogized! Only SVM or logisticregression supported")
-
     # Performing the decoding in a time resolved fashion:
     time_decod = SlidingEstimator(clf, n_jobs=n_jobs, scoring='accuracy', verbose=True)
-    # Scoring the classifier:
-    scores = cross_val_multiscore(time_decod, data, labels, cv=n_cv, n_jobs=n_jobs)
 
-    # Saving the results to file:
-    np.save(Path(results_save_root, "sub-" + subject + "_decoding_scores.npy"), scores)
+    # Extract the data:
+    data = np.squeeze(epochs.get_data())
+    # Extract the labels:
+    y = epochs.metadata[labels_condition].to_numpy()
+    labels = list(set(y))
+    # Perform cross validation:
+    skf = StratifiedKFold(n_splits=n_cv)
+    confusion_matrices = np.zeros((len(labels), len(labels), data.shape[-1], n_cv))
+    ctr = 0
+    for train_index, test_index in skf.split(data, y):
+        print("TRAIN:", train_index, "TEST:", test_index)
+        x_train, x_test = data[train_index], data[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        # Fit the classifier on the train data:
+        time_decod.fit(X=x_train, y=y_train)
+        # Predict:
+        y_pred = time_decod.predict(x_test)
+        # Generate a confusion matrix:
+        for i in range(x_train.shape[-1]):
+            confusion_matrices[:, :, i, ctr] = confusion_matrix(y_test, np.squeeze(y_pred[:, i]),
+                                                                labels=labels, normalize="true")
+        ctr += 1
+    # Average across the CV:
+    confusion_matrices = np.mean(confusion_matrices, axis=-1)
+    # Loop through the labels:
+    scores = {}
+    for ind, label in enumerate(labels):
+        scores[label] = confusion_matrices[ind, ind, :]
+        np.save(Path(results_save_root, "sub-" + subject + "_"
+                     + label +"_decoding_scores.npy"), scores[label])
 
-    # Average scores across cross-validation splits
-    scores = np.mean(scores, axis=0)
     # Plot the results:
     fig, ax = plt.subplots()
-    ax.plot(epochs.times, scores, label='score')
-    ax.axhline(1/len(np.unique(labels)), color='k', linestyle='--', label='chance')
+    for label in scores.keys():
+        ax.plot(epochs.times, scores[label], label=label)
+    ax.axhline(1/len(labels), color='k', linestyle='--', label='chance')
     ax.set_xlabel('Times')
     ax.set_ylabel('Accuracy')  # Area Under the Curve
     ax.legend()
@@ -142,22 +172,26 @@ def mvpa_manager():
         results_save_root = path_generator(save_root, analysis=config["name"],
                                            preprocessing_steps=config["preprocess_steps"],
                                            fig=False, results=True, data=False)
-        # Saving the results to file:
-        scores = np.array(scores)
-        np.save(Path(results_save_root, "population_decoding_scores.npy"), scores)
-        # Compute the mean and ci of the decoding:
-        avg, low_ci, up_ci = mean_confidence_interval(scores)
+        # Combinining participants results:
+        population_scores = {key: None for key in scores[0].keys()}
+        for label in population_scores.keys():
+            population_scores[label] = np.array([score[label] for score in scores])
+            np.save(Path(results_save_root, "sub-population_"
+                         + label + "_decoding_scores.npy"), scores[label])
+
         # Plot the results:
         fig, ax = plt.subplots()
-        ax.plot(avg)
-        ax.fill_between(up_ci, low_ci, alpha=.2)
+        for label in population_scores.keys():
+            # Compute the mean and ci of the decoding:
+            avg, low_ci, up_ci = mean_confidence_interval(scores)
+            ax.plot(avg, label=label)
+            ax.fill_between(up_ci, low_ci, alpha=.2)
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
         ax.legend()
         ax.set_title('Population decoding')
         # Save the figure to a file:
         plt.savefig(Path(fig_save_root, "population" + "_decoding_scores.png"))
-
         print("DONE!")
 
 
