@@ -67,8 +67,7 @@ def mat2mne(matfile):
                               np.array(events_uid)))
 
     # Extract the data:
-    data = np.reshape(eeg_mat["X_3D"], (eeg_mat["X_3D"].shape[2], eeg_mat["X_3D"].shape[0], eeg_mat["X_3D"].shape[1]))
-
+    data = np.moveaxis(eeg_mat["X_3D"], [0, 2], [1, 0])
     # Generate the epochs:
     epochs = mne.EpochsArray(data, info, tmin=0, events=events, event_id=event_dict)
 
