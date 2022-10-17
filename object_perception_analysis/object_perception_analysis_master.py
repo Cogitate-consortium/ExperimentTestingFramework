@@ -80,8 +80,6 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
         )
     else:
         raise Exception("The classifier passed was not recogized! Only SVM or logisticregression supported")
-    # Performing the decoding in a time resolved fashion:
-    time_decod = SlidingEstimator(clf, n_jobs=n_jobs, scoring='accuracy', verbose=True)
 
     # Extract the data:
     data = np.squeeze(epochs.get_data())
@@ -91,20 +89,28 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     # Perform cross validation:
     skf = StratifiedKFold(n_splits=n_cv)
     confusion_matrices = np.zeros((len(labels), len(labels), data.shape[-1], n_cv))
-    ctr = 0
+    fold_ctr = 0
+    # Looping through folds:
     for train_index, test_index in skf.split(data, y):
-        print("TRAIN:", train_index, "TEST:", test_index)
-        x_train, x_test = data[train_index], data[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-        # Fit the classifier on the train data:
-        time_decod.fit(X=x_train, y=y_train)
-        # Predict:
-        y_pred = time_decod.predict(x_test)
-        # Generate a confusion matrix:
-        for i in range(x_train.shape[-1]):
-            confusion_matrices[:, :, i, ctr] = confusion_matrix(y_test, np.squeeze(y_pred[:, i]),
-                                                                labels=labels, normalize="true")
-        ctr += 1
+        print("Training and testing classifier")
+        print("Fold: {}".format(fold_ctr + 1))
+        sample_ctr = 0
+        # Looping through the time windows:
+        for i in range(0, data.shape[-1] - config["n_sample_window"] + 1, config["n_sample_steps"]):
+            x_train, x_test = data[train_index, :, i:i + config["n_sample_window"]], \
+                              data[test_index, :, i:i + config["n_sample_window"]]
+            y_train, y_test = y[train_index], y[test_index]
+            # Reshape the x arays:
+            x_train, x_test = x_train.reshape(x_train.shape[0], -1), x_test.reshape(x_test.shape[0], -1)
+            # Fit the classifier on the train data:
+            clf.fit(X=x_train, y=y_train)
+            # Predict:
+            y_pred = clf.predict(x_test)
+            # Generate a confusion matrix:
+            confusion_matrices[:, :, sample_ctr, fold_ctr] = confusion_matrix(y_test, y_pred,
+                                                                              labels=labels, normalize="true")
+            sample_ctr += 1
+        fold_ctr += 1
     # Average across the CV:
     confusion_matrices = np.mean(confusion_matrices, axis=-1)
     # Loop through the labels:
@@ -112,13 +118,13 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     for ind, label in enumerate(labels):
         scores[label] = confusion_matrices[ind, ind, :]
         np.save(Path(results_save_root, "sub-" + subject + "_"
-                     + label +"_decoding_scores.npy"), scores[label])
+                     + label + "_decoding_scores.npy"), scores[label])
 
     # Plot the results:
     fig, ax = plt.subplots()
     for label in scores.keys():
         ax.plot(epochs.times, scores[label], label=label)
-    ax.axhline(1/len(labels), color='k', linestyle='--', label='chance')
+    ax.axhline(1 / len(labels), color='k', linestyle='--', label='chance')
     ax.set_xlabel('Times')
     ax.set_ylabel('Accuracy')  # Area Under the Curve
     ax.legend()
