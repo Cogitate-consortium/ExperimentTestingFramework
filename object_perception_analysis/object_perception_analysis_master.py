@@ -25,6 +25,7 @@ colors = sns.color_palette("colorblind")
 def classification_wrapper(data, y, clf, train_index, test_index, n_sample_window=6, n_sample_steps=3):
     print("Training and testing classifier")
     labels = list(set(y))
+    labels.sort()
     sample_ctr = 0
     res_mat = np.zeros((len(labels), len(labels),
                         np.arange(0, data.shape[-1] - n_sample_window + 1,
@@ -109,6 +110,7 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     # Extract the labels:
     y = epochs.metadata[labels_condition].to_numpy()
     labels = list(set(y))
+    labels.sort()
     # Perform cross validation:
     skf = StratifiedKFold(n_splits=n_cv)
     # Looping through folds:
@@ -204,7 +206,7 @@ def mvpa_manager():
             times = np.linspace(t0, tmax, num=avg.shape[0])
             ax.scatter(times, avg, c=colors[ind])
             ax.plot(times, avg, label=label, linewidth=0.5, color=colors[ind])
-            # ax.fill_between(times, low_ci, up_ci, alpha=.2, facecolor=colors[ind])
+            ax.fill_between(times, low_ci, up_ci, alpha=.2, facecolor=colors[ind])
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
         ax.legend()
