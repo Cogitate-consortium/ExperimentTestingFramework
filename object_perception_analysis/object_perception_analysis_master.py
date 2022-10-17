@@ -198,7 +198,7 @@ def mvpa_manager():
         for label in population_scores.keys():
             population_scores[label] = np.array([score[label] for score in scores])
         # Save the results to file:
-        with open(Path(results_save_root, "sub-population_decoding_scores.pkl"), 'wb'):
+        with open(Path(results_save_root, "sub-population_decoding_scores.pkl"), 'wb') as f:
             pickle.dump(population_scores, f)
         # Plot the results:
         fig, ax = plt.subplots()
@@ -207,7 +207,7 @@ def mvpa_manager():
             avg, low_ci, up_ci = mean_confidence_interval(population_scores[label])
             times = np.linspace(t0, tmax, num=avg.shape[0])
             ax.scatter(times, avg, c=colors[ind])
-            ax.plot(times, avg, label=label, linewidth=0.5, colors=colors[ind])
+            ax.plot(times, avg, label=label, linewidth=0.5, color=colors[ind])
             ax.fill_between(times, low_ci, up_ci, alpha=.2, facecolor=colors[ind])
         ax.set_xlabel('Times')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
