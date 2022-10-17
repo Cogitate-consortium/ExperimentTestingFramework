@@ -7,7 +7,7 @@
   "preprocess_steps": "unknown",
   "signal": "erp",
   "analysis": "mvpa",
-  "name": "category_svm",
+  "name": "category_lda",
   "conditions": ["human_face", "human_face", "animal_body", "animal_face", "fruit_vegetable", "inanimate_object"],
   "labels_condition": "category",
   "classifier": "lda",

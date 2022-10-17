@@ -63,19 +63,16 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     if classifier.lower() == "svm":
         clf = make_pipeline(
             StandardScaler(),
-            SelectKBest(f_classif, k=n_features),
             LinearSVC()
         )
     elif classifier.lower() == "logisticregression":
         clf = make_pipeline(
             StandardScaler(),
-            SelectKBest(f_classif, k=n_features),
             LogisticRegression(solver='liblinear')
         )
     elif classifier.lower() == "lda":
         clf = make_pipeline(
             StandardScaler(),
-            SelectKBest(f_classif, k=n_features),
             LinearDiscriminantAnalysis()
         )
     else:
