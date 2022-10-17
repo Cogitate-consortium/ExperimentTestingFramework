@@ -11,7 +11,7 @@
   "conditions": ["human_face", "inanimate_object"],
   "labels_condition": "category",
   "classifier": "svm",
-  "n_cv": 5,
+  "n_cv": 10,
   "n_features": 30,
   "n_jobs": 8,
   "trigger_jitter_parameter": {
