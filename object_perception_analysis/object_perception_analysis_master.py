@@ -177,7 +177,7 @@ def mvpa_manager():
         for label in population_scores.keys():
             population_scores[label] = np.array([score[label] for score in scores])
             np.save(Path(results_save_root, "sub-population_"
-                         + label + "_decoding_scores.npy"), scores[label])
+                         + label + "_decoding_scores.npy"), population_scores[label])
 
         # Plot the results:
         fig, ax = plt.subplots()
