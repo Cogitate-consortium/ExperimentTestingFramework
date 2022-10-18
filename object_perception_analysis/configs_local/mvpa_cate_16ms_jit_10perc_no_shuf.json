@@ -21,6 +21,6 @@
     "trials_proportion": 0.1
   },
   "trigger_shuffle_parameter": {
-    "trials_proportion": 0.05
+    "trials_proportion": 0.0
   }
 }

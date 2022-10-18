@@ -41,18 +41,28 @@ def generate_jitter(epochs, jitter_amp_ms=16, trials_proportion=0.1):
 
 
 def shuffle_triggers(epochs, trials_proportion=0.05):
+    """
+    This function randomly shuffles the triggers of a specified proportion of trials in the mne epochs object. This
+    is useful to
+    :param epochs:
+    :param trials_proportion:
+    :return:
+    """
     # Get the indices of all trials:
-    all_trials_ind = np.arange(0, epochs.events.shape[0])
-    # Randomly pick trials indices to mix up:
-    to_shuffle_ind = np.random.randint(0, high=epochs.events.shape[0],
-                                       size=int(trials_proportion * epochs.events.shape[0]))
-    # Randomly shuffle their order:
-    shuffle_ind = np.random.randint(0, high=to_shuffle_ind.shape[0],
-                                    size=to_shuffle_ind.shape[0])
+    all_trials_inds = np.arange(0, epochs.events.shape[0])
+    # Randmoly subsample a set of trials to shuffle:
+    subsample_inds = np.sort(np.random.randint(0, high=epochs.events.shape[0],
+                                               size=int(trials_proportion * epochs.events.shape[0])))
+    # Randomly shuffle the subset:
+    shuffled_subsample = np.random.permutation(subsample_inds)
     new_ind = []
-    for ind in all_trials_ind:
-        if ind in to_shuffle_ind:
-            new_ind.append(to_shuffle_ind[shuffle_ind][np.where(to_shuffle_ind == ind)][0])
+    # Loop through each trial:
+    for ind in all_trials_inds:
+        # If the current index is one that was shuffled:
+        if ind in subsample_inds:
+            # Find the trial index within the subsample:
+            subsample_ind = np.where(subsample_inds == ind)
+            new_ind.append(shuffled_subsample[subsample_ind][0])
         else:
             new_ind.append(ind)
 
