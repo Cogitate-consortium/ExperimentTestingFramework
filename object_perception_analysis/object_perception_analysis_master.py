@@ -20,6 +20,18 @@ from general_utilities.data_helper_function import mean_confidence_interval
 from general_utilities.jitter_simulation import generate_jitter
 
 colors = sns.color_palette("colorblind")
+fig_size = [15, 20]
+SMALL_SIZE = 22
+MEDIUM_SIZE = 24
+BIGGER_SIZE = 26
+cmap = "RdYlBu_r"
+plt.rc('font', size=SMALL_SIZE)  # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)  # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)  # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the fi
 
 
 def classification_wrapper(data, y, clf, train_index, test_index, n_sample_window=6, n_sample_steps=3):
@@ -130,7 +142,7 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
                      + label + "_decoding_scores.npy"), scores[label])
 
     # Plot the results:
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=fig_size)
     for label in scores.keys():
         times = np.linspace(epochs.times[0], epochs.times[-1], num=scores[label].shape[0])
         ax.plot(times, scores[label], label=label)
@@ -202,7 +214,7 @@ def mvpa_manager():
         with open(Path(results_save_root, "sub-population_decoding_scores.pkl"), 'wb') as f:
             pickle.dump(population_scores, f)
         # Plot the results:
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=fig_size)
         for ind, label in enumerate(population_scores.keys()):
             # Compute the mean and ci of the decoding:
             avg, low_ci, up_ci = mean_confidence_interval(population_scores[label])
