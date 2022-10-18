@@ -15,7 +15,7 @@
   "n_sample_steps": 3,
   "n_cv": 10,
   "n_features": 30,
-  "n_jobs": 4,
+  "n_jobs": 8,
   "trigger_jitter_parameter": {
     "jitter_amp_ms": 16,
     "trials_proportion": 0.5
