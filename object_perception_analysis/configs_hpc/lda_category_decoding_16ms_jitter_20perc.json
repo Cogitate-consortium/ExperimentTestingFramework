@@ -19,5 +19,8 @@
   "trigger_jitter_parameter": {
     "jitter_amp_ms": 16,
     "trials_proportion": 0.2
+  },
+  "trigger_shuffle_parameter": {
+    "trials_proportion": 0.0
   }
 }
