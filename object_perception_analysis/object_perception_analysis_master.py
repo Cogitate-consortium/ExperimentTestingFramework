@@ -152,7 +152,10 @@ def mvpa_manager():
                         help="Config file for analysis parameters (file name + path)")
     args = parser.parse_args()
     if args.config is None:
-        configs = find_files(Path(os.getcwd(), "configs"), naming_pattern="*", extension=".json")
+        if os.name == "nt":
+            configs = find_files(Path(os.getcwd(), "configs_local"), naming_pattern="*", extension=".json")
+        else:
+            configs = find_files(Path(os.getcwd(), "configs_hpc"), naming_pattern="*", extension=".json")
     else:
         configs = [args.config]
 
