@@ -34,34 +34,34 @@ def generate_jitter(epochs, jitter_amp_ms=16, trials_proportion=0.1):
 
     # Recreate the epoch object:
     metadata = epochs.metadata
-    epochs = mne.EpochsArray(data_new, epochs.info, tmin=epochs.times[0], events=epochs.events, event_id=epochs.event_id)
+    epochs = mne.EpochsArray(data_new, epochs.info, tmin=epochs.times[0], events=epochs.events,
+                             event_id=epochs.event_id)
     epochs.metadata = metadata
     return epochs
 
 
-def mix_triggers(epochs, trials_proportion=0.05):
-
+def shuffle_triggers(epochs, trials_proportion=0.05):
     # Get the indices of all trials:
     all_trials_ind = np.arange(0, epochs.events.shape[0])
     # Randomly pick trials indices to mix up:
-    trials_ind = np.random.randint(0, high=epochs.events.shape[0],
-                                   size=int(trials_proportion * epochs.events.shape[0]))
+    to_shuffle_ind = np.random.randint(0, high=epochs.events.shape[0],
+                                       size=int(trials_proportion * epochs.events.shape[0]))
     # Randomly shuffle their order:
-    shuffle_ind = np.random.randint(0, high=trials_ind.shape[0],
-                                   size=int(trials_proportion * trials_ind.shape[0]))
+    shuffle_ind = np.random.randint(0, high=to_shuffle_ind.shape[0],
+                                    size=to_shuffle_ind.shape[0])
     new_ind = []
     for ind in all_trials_ind:
-        if ind in trials_ind:
-            new_ind.append(trials_ind[shuffle_ind][ind])
+        if ind in to_shuffle_ind:
+            new_ind.append(to_shuffle_ind[shuffle_ind][np.where(to_shuffle_ind == ind)][0])
         else:
             new_ind.append(ind)
 
     # Now, reorganize the events and meta data accordingly:
-    new_events = epochs.events[new_ind, :]
+    new_events = epochs.events[new_ind, 2]
+    epochs.events[:, 2] = new_events
     new_metadata = epochs.metadata.iloc[new_ind].reset_index(drop=True)
 
     epochs.events = new_events
     epochs.metadata = new_metadata
 
     return epochs
-

@@ -17,7 +17,7 @@ import seaborn as sns
 
 from general_utilities.path_helper_function import find_files, list_subjects, path_generator, load_epochs
 from general_utilities.data_helper_function import mean_confidence_interval
-from general_utilities.simulate_malfunction import generate_jitter
+from general_utilities.simulate_malfunction import generate_jitter, shuffle_triggers
 
 colors = sns.color_palette("colorblind")
 fig_size = [15, 20]
@@ -98,7 +98,7 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     if config["trigger_jitter_parameter"] is not None:
         epochs = generate_jitter(epochs, **config["trigger_jitter_parameter"])
     if config["trigger_shuffle_parameter"] is not None:
-        epochs = generate_jitter(epochs, **config["trigger_shuffle_parameter"])
+        epochs = shuffle_triggers(epochs, **config["trigger_shuffle_parameter"])
 
     # Prepare the classifier:
     if classifier.lower() == "svm":
