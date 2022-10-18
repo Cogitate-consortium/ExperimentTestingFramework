@@ -94,7 +94,7 @@ def conversion_manager(root):
         # Generate the file name:
         file_name = "sub-{}_ses-{}_task-{}_desc-epoching_{}-epo.fif".format(sub, ses, task, data_type)
         # Save the epoch:
-        mne_epochs.save(Path(save_path, file_name))
+        mne_epochs.save(Path(save_path, file_name), overwrite=True)
 
 
 if __name__ == "__main__":

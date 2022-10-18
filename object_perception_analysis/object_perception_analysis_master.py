@@ -17,7 +17,7 @@ import seaborn as sns
 
 from general_utilities.path_helper_function import find_files, list_subjects, path_generator, load_epochs
 from general_utilities.data_helper_function import mean_confidence_interval
-from general_utilities.jitter_simulation import generate_jitter
+from general_utilities.simulate_malfunction import generate_jitter
 
 colors = sns.color_palette("colorblind")
 fig_size = [15, 20]
@@ -62,7 +62,7 @@ def classification_wrapper(data, y, clf, train_index, test_index, n_sample_windo
 
 
 def single_subject_mvpa(subject, epochs, config, conditions=None, labels_condition=None, classifier="svm", n_cv=5,
-                        n_features=30, n_jobs=8):
+                        n_jobs=8):
     """
 
     :param subject:
@@ -97,6 +97,8 @@ def single_subject_mvpa(subject, epochs, config, conditions=None, labels_conditi
     # Mess the triggers timing if needed:
     if config["trigger_jitter_parameter"] is not None:
         epochs = generate_jitter(epochs, **config["trigger_jitter_parameter"])
+    if config["trigger_shuffle_parameter"] is not None:
+        epochs = generate_jitter(epochs, **config["trigger_shuffle_parameter"])
 
     # Prepare the classifier:
     if classifier.lower() == "svm":
@@ -195,8 +197,7 @@ def mvpa_manager():
                                               labels_condition=config["labels_condition"],
                                               classifier=config["classifier"],
                                               n_cv=config["n_cv"],
-                                              n_jobs=config["n_jobs"],
-                                              n_features=config["n_features"]))
+                                              n_jobs=config["n_jobs"]))
 
         # Generate the path to save the population results:
         save_root = Path(config["bids_root"], "derivatives", config["analysis"], "population")

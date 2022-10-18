@@ -2,6 +2,9 @@ import numpy as np
 import mne
 
 
+# def jitter_from_distribution():
+
+
 def generate_jitter(epochs, jitter_amp_ms=16, trials_proportion=0.1):
     """
     This function enables introducing temporal jitter to mne epochs object according to a few set of parameters
@@ -33,5 +36,32 @@ def generate_jitter(epochs, jitter_amp_ms=16, trials_proportion=0.1):
     metadata = epochs.metadata
     epochs = mne.EpochsArray(data_new, epochs.info, tmin=epochs.times[0], events=epochs.events, event_id=epochs.event_id)
     epochs.metadata = metadata
+    return epochs
+
+
+def mix_triggers(epochs, trials_proportion=0.05):
+
+    # Get the indices of all trials:
+    all_trials_ind = np.arange(0, epochs.events.shape[0])
+    # Randomly pick trials indices to mix up:
+    trials_ind = np.random.randint(0, high=epochs.events.shape[0],
+                                   size=int(trials_proportion * epochs.events.shape[0]))
+    # Randomly shuffle their order:
+    shuffle_ind = np.random.randint(0, high=trials_ind.shape[0],
+                                   size=int(trials_proportion * trials_ind.shape[0]))
+    new_ind = []
+    for ind in all_trials_ind:
+        if ind in trials_ind:
+            new_ind.append(trials_ind[shuffle_ind][ind])
+        else:
+            new_ind.append(ind)
+
+    # Now, reorganize the events and meta data accordingly:
+    new_events = epochs.events[new_ind, :]
+    new_metadata = epochs.metadata.iloc[new_ind].reset_index(drop=True)
+
+    epochs.events = new_events
+    epochs.metadata = new_metadata
+
     return epochs
 

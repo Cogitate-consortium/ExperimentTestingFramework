@@ -7,7 +7,7 @@
   "preprocess_steps": "unknown",
   "signal": "erp",
   "analysis": "mvpa",
-  "name": "category_lda_jitter_16ms_50perc",
+  "name": "cate_16ms_jit_30perc_no_shuf",
   "conditions": ["human_face", "human_face", "animal_body", "animal_face", "fruit_vegetable", "inanimate_object"],
   "labels_condition": "category",
   "classifier": "lda",
@@ -18,6 +18,9 @@
   "n_jobs": 4,
   "trigger_jitter_parameter": {
     "jitter_amp_ms": 16,
-    "trials_proportion": 0.5
+    "trials_proportion": 0.3
+  },
+  "trigger_shuffle_parameter": {
+    "trials_proportion": 0.05
   }
 }

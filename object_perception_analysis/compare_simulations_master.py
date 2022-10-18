@@ -87,9 +87,10 @@ def compare_simulated_jitters():
         # Average across all the different labels:
         data = np.mean(np.array([results[key][label] for label in results[key].keys()]), axis=0)
         avg, low_ci, up_ci = mean_confidence_interval(data)
-        ax.plot(avg, label=label)
-        ax.fill_between(range(avg.shape[-1]), up_ci, low_ci, alpha=.2)
-        ax.set_xlabel('Times')
+        times = np.linspace(t0, tmax, num=avg.shape[-1])
+        ax.plot(times, avg, label=label)
+        ax.fill_between(times, up_ci, low_ci, alpha=.2)
+        ax.set_xlabel('Times (s)')
         ax.set_ylabel('Accuracy')  # Area Under the Curve
     ax.legend()
     ax.axvline(.0, color='k', linestyle='-')
@@ -108,9 +109,10 @@ def compare_simulated_jitters():
             line_label = "{}ms, {}%trials".format(param["jitter_amp_ms"].values[0],
                                                   param["trials_proportion"].values[0] * 100)
             avg, low_ci, up_ci = mean_confidence_interval(results[key][label])
-            ax.plot(avg, label=line_label)
-            ax.fill_between(range(avg.shape[-1]), up_ci, low_ci, alpha=.2)
-            ax.set_xlabel('Times')
+            times = np.linspace(t0, tmax, num=avg.shape[-1])
+            ax.plot(times, avg, label=line_label)
+            ax.fill_between(times, up_ci, low_ci, alpha=.2)
+            ax.set_xlabel('Times (s)')
             ax.set_ylabel('Accuracy')  # Area Under the Curve
         ax.legend()
         ax.axvline(.0, color='k', linestyle='-')
