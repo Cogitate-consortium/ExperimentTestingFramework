@@ -1,5 +1,5 @@
 {
-  "bids_root": "C:\\Users\\alexander.lepauvre\\Documents\\PhD\\Experimental_testing_framework\\data\\object_processing\\bids",
+  "bids_root": "/mnt/beegfs/XNAT/workspace/001_testing_framework/object_processing/bids",
   "ses": "1",
   "data_type": "eeg",
   "task": "object_processing",
