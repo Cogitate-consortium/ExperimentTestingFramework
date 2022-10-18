@@ -75,23 +75,31 @@ def compare_simulated_jitters():
     configs_df = configs_df.reset_index(drop=True)
 
     # Create path to save the results:
-    save_root = Path(config["bids_root"], "derivatives", config["analysis"], "simulation_comparisons")
+    save_root = Path(config["bids_root"], "derivatives", config["analysis"], "simulations")
     if not os.path.isdir(save_root):
         os.makedirs(save_root)
 
+    # ==================================================================================================================
+    # 1. Plot results with jitter without triggers shuffle:
+    # Create path to save the results:
+    no_shuffle_save_root = Path(config["bids_root"], "derivatives", config["analysis"], "simulations",
+                                "jitter_no_shuffle")
+    if not os.path.isdir(no_shuffle_save_root):
+        os.makedirs(no_shuffle_save_root)
+    no_shuffle_names = configs_df.loc[configs_df["trigger_shuffle_proportion"] == 0, "name"].to_list()
     # =======================================================================
-    # 1. Plot the decoding results averaged across labels:
+    # 1.1. Plot the decoding results averaged across labels:
     fig, ax = plt.subplots(figsize=fig_size)
-    for ind, key in enumerate(results.keys()):
+    for ind, name in enumerate(no_shuffle_names):
         # Get the parameter:
-        param = configs_df.loc[configs_df["name"] == key, ["jitter_amp_ms", "trials_proportion",
-                                                           "trigger_shuffle_proportion"]]
+        param = configs_df.loc[configs_df["name"] == name, ["jitter_amp_ms", "trials_proportion",
+                                                            "trigger_shuffle_proportion"]]
         label = "{}ms, {}%trials, {}%shuffle".format(param["jitter_amp_ms"].values[0],
                                                      param["trials_proportion"].values[0] * 100,
                                                      param["trigger_shuffle_proportion"].values[0] * 100
                                                      )
         # Average across all the different labels:
-        data = np.mean(np.array([results[key][label] for label in results[key].keys()]), axis=0)
+        data = np.mean(np.array([results[name][label] for label in results[name].keys()]), axis=0)
         avg, low_ci, up_ci = mean_confidence_interval(data)
         times = np.linspace(t0, tmax, num=avg.shape[-1])
         ax.plot(times, avg, label=label)
@@ -102,22 +110,22 @@ def compare_simulated_jitters():
     ax.axvline(.0, color='k', linestyle='-')
     ax.set_title('Average decoding accuracy')
     # Save the figure to a file:
-    plt.savefig(Path(save_root, "average_decoding_scores.png"))
+    plt.savefig(Path(no_shuffle_save_root, "average_decoding_scores.png"))
 
     # =======================================================================
-    # 2. Plot the decoding results separately for each label:
+    # 1.2. Plot the decoding results separately for each label:
     labels = list(results[list(results.keys())[0]].keys())
     for label in labels:
         fig, ax = plt.subplots(figsize=fig_size)
-        for ind, key in enumerate(results.keys()):
+        for ind, name in enumerate(no_shuffle_names):
             # Average across all the different labels:
-            param = configs_df.loc[configs_df["name"] == key, ["jitter_amp_ms", "trials_proportion",
-                                                               "trigger_shuffle_proportion"]]
+            param = configs_df.loc[configs_df["name"] == name, ["jitter_amp_ms", "trials_proportion",
+                                                                "trigger_shuffle_proportion"]]
             line_label = "{}ms, {}%trials, {}%shuffle".format(param["jitter_amp_ms"].values[0],
                                                               param["trials_proportion"].values[0] * 100,
                                                               param["trigger_shuffle_proportion"].values[0] * 100
                                                               )
-            avg, low_ci, up_ci = mean_confidence_interval(results[key][label])
+            avg, low_ci, up_ci = mean_confidence_interval(results[name][label])
             times = np.linspace(t0, tmax, num=avg.shape[-1])
             ax.plot(times, avg, label=line_label)
             ax.fill_between(times, up_ci, low_ci, alpha=.2)
@@ -127,11 +135,12 @@ def compare_simulated_jitters():
         ax.axvline(.0, color='k', linestyle='-')
         ax.set_title('{} decoding accuracy'.format(label))
         # Save the figure to a file:
-        plt.savefig(Path(save_root, "{}_decoding_scores.png".format(label)))
+        plt.savefig(Path(no_shuffle_save_root, "{}_decoding_scores.png".format(label)))
 
     # =======================================================================
-    # 3. Plotting the max decoding accuracy as a function of proportion of jitter separately for each jitter duration:
-    for jitter_dur in configs_df["jitter_amp_ms"].unique():
+    # 1.3. Plotting the max decoding accuracy as a function of proportion of jitter separately for each jitter duration:
+    no_shuf_config = configs_df.loc[configs_df["name"].isin(no_shuffle_names)]
+    for jitter_dur in no_shuf_config["jitter_amp_ms"].unique():
         # Extract only the relevant data:
         jitter_dur_df = configs_df.loc[configs_df["jitter_amp_ms"] == jitter_dur]
         # Plot the max decoding accuracy as a function of proportion of trials affected:
@@ -141,7 +150,80 @@ def compare_simulated_jitters():
         ax.set_xlabel('Trials proportion')
         ax.set_ylabel('Peak accuracy')
         # Save the figure to a file:
-        plt.savefig(Path(save_root, "{}ms_peak_decoding_scores.png".format(jitter_dur)))
+        plt.savefig(Path(no_shuffle_save_root, "{}ms_peak_decoding_scores.png".format(jitter_dur)))
+
+    # ==================================================================================================================
+    # 2. Plot results with trigger shuffle without jitter:
+    # Create path to save the results:
+    no_jitter_save_root = Path(config["bids_root"], "derivatives", config["analysis"], "simulations",
+                               "shuffle_no_jitter")
+    if not os.path.isdir(no_jitter_save_root):
+        os.makedirs(no_jitter_save_root)
+    no_jitter_names = configs_df.loc[configs_df["trials_proportion"] == 0, "name"].to_list()
+    # =======================================================================
+    # 1.1. Plot the decoding results averaged across labels:
+    fig, ax = plt.subplots(figsize=fig_size)
+    for ind, name in enumerate(no_jitter_names):
+        # Get the parameter:
+        param = configs_df.loc[configs_df["name"] == name, ["jitter_amp_ms", "trials_proportion",
+                                                            "trigger_shuffle_proportion"]]
+        label = "{}ms, {}%trials, {}%shuffle".format(param["jitter_amp_ms"].values[0],
+                                                     param["trials_proportion"].values[0] * 100,
+                                                     param["trigger_shuffle_proportion"].values[0] * 100
+                                                     )
+        # Average across all the different labels:
+        data = np.mean(np.array([results[name][label] for label in results[name].keys()]), axis=0)
+        avg, low_ci, up_ci = mean_confidence_interval(data)
+        times = np.linspace(t0, tmax, num=avg.shape[-1])
+        ax.plot(times, avg, label=label)
+        ax.fill_between(times, up_ci, low_ci, alpha=.2)
+        ax.set_xlabel('Times (s)')
+        ax.set_ylabel('Accuracy')  # Area Under the Curve
+    ax.legend()
+    ax.axvline(.0, color='k', linestyle='-')
+    ax.set_title('Average decoding accuracy')
+    # Save the figure to a file:
+    plt.savefig(Path(no_jitter_save_root, "average_decoding_scores.png"))
+
+    # =======================================================================
+    # 1.2. Plot the decoding results separately for each label:
+    labels = list(results[list(results.keys())[0]].keys())
+    for label in labels:
+        fig, ax = plt.subplots(figsize=fig_size)
+        for ind, name in enumerate(no_jitter_names):
+            # Average across all the different labels:
+            param = configs_df.loc[configs_df["name"] == name, ["jitter_amp_ms", "trials_proportion",
+                                                                "trigger_shuffle_proportion"]]
+            line_label = "{}ms, {}%trials, {}%shuffle".format(param["jitter_amp_ms"].values[0],
+                                                              param["trials_proportion"].values[0] * 100,
+                                                              param["trigger_shuffle_proportion"].values[0] * 100
+                                                              )
+            avg, low_ci, up_ci = mean_confidence_interval(results[name][label])
+            times = np.linspace(t0, tmax, num=avg.shape[-1])
+            ax.plot(times, avg, label=line_label)
+            ax.fill_between(times, up_ci, low_ci, alpha=.2)
+            ax.set_xlabel('Times (s)')
+            ax.set_ylabel('Accuracy')  # Area Under the Curve
+        ax.legend()
+        ax.axvline(.0, color='k', linestyle='-')
+        ax.set_title('{} decoding accuracy'.format(label))
+        # Save the figure to a file:
+        plt.savefig(Path(no_jitter_save_root, "{}_decoding_scores.png".format(label)))
+
+    # =======================================================================
+    # 1.3. Plotting the max decoding accuracy as a function of proportion of jitter separately for each jitter duration:
+    no_jitter_config = configs_df.loc[configs_df["name"].isin(no_jitter_names)]
+    for jitter_dur in no_jitter_config["jitter_amp_ms"].unique():
+        # Extract only the relevant data:
+        jitter_dur_df = configs_df.loc[configs_df["jitter_amp_ms"] == jitter_dur]
+        # Plot the max decoding accuracy as a function of proportion of trials affected:
+        fig, ax = plt.subplots(figsize=fig_size)
+        ax.scatter(jitter_dur_df["trials_proportion"], jitter_dur_df["max_decoding"])
+        ax.plot(jitter_dur_df["trials_proportion"], jitter_dur_df["max_decoding"])
+        ax.set_xlabel('Trials proportion')
+        ax.set_ylabel('Peak accuracy')
+        # Save the figure to a file:
+        plt.savefig(Path(no_jitter_save_root, "{}ms_peak_decoding_scores.png".format(jitter_dur)))
 
     print("DONE!")
 
