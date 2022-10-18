@@ -142,11 +142,11 @@ def compare_simulated_jitters():
     no_shuf_config = configs_df.loc[configs_df["name"].isin(no_shuffle_names)]
     for jitter_dur in no_shuf_config["jitter_amp_ms"].unique():
         # Extract only the relevant data:
-        jitter_dur_df = configs_df.loc[configs_df["jitter_amp_ms"] == jitter_dur]
+        jitter_dur_df = no_shuf_config.loc[no_shuf_config["jitter_amp_ms"] == jitter_dur].sort_values('trials_proportion')
         # Plot the max decoding accuracy as a function of proportion of trials affected:
         fig, ax = plt.subplots(figsize=fig_size)
-        ax.scatter(jitter_dur_df["trials_proportion"], jitter_dur_df["max_decoding"])
-        ax.plot(jitter_dur_df["trials_proportion"], jitter_dur_df["max_decoding"])
+        ax.scatter(jitter_dur_df["trials_proportion"].to_numpy(), jitter_dur_df["max_decoding"].to_numpy())
+        ax.plot(jitter_dur_df["trials_proportion"].to_numpy(), jitter_dur_df["max_decoding"].to_numpy())
         ax.set_xlabel('Trials proportion')
         ax.set_ylabel('Peak accuracy')
         # Save the figure to a file:
@@ -212,11 +212,11 @@ def compare_simulated_jitters():
 
     # =======================================================================
     # 1.3. Plotting the max decoding accuracy as a function of proportion of jitter separately for each jitter duration:
-    no_jitter_config = configs_df.loc[configs_df["name"].isin(no_jitter_names)]
+    no_jitter_config = configs_df.loc[configs_df["name"].isin(no_jitter_names)].sort_values("trigger_shuffle_proportion")
     # Plot the max decoding accuracy as a function of proportion of trials affected:
     fig, ax = plt.subplots(figsize=fig_size)
-    ax.scatter(no_jitter_config["trigger_shuffle_proportion"], no_jitter_config["max_decoding"])
-    ax.plot(no_jitter_config["trigger_shuffle_proportion"], no_jitter_config["max_decoding"])
+    ax.scatter(no_jitter_config["trigger_shuffle_proportion"].to_numpy(), no_jitter_config["max_decoding"].to_numpy())
+    ax.plot(no_jitter_config["trigger_shuffle_proportion"].to_numpy(), no_jitter_config["max_decoding"].to_numpy())
     ax.set_xlabel('Trials proportion')
     ax.set_ylabel('Shuffled labels peak accuracy')
     # Save the figure to a file:
