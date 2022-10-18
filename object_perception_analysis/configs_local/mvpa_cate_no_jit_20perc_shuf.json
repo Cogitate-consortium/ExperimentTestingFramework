@@ -18,7 +18,7 @@
   "n_jobs": 4,
   "trigger_jitter_parameter": {
     "jitter_amp_ms": 16,
-    "trials_proportion": 0.1
+    "trials_proportion": 0.0
   },
   "trigger_shuffle_parameter": {
     "trials_proportion": 0.20

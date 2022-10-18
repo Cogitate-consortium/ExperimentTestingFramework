@@ -213,17 +213,14 @@ def compare_simulated_jitters():
     # =======================================================================
     # 1.3. Plotting the max decoding accuracy as a function of proportion of jitter separately for each jitter duration:
     no_jitter_config = configs_df.loc[configs_df["name"].isin(no_jitter_names)]
-    for jitter_dur in no_jitter_config["jitter_amp_ms"].unique():
-        # Extract only the relevant data:
-        jitter_dur_df = configs_df.loc[configs_df["jitter_amp_ms"] == jitter_dur]
-        # Plot the max decoding accuracy as a function of proportion of trials affected:
-        fig, ax = plt.subplots(figsize=fig_size)
-        ax.scatter(jitter_dur_df["trials_proportion"], jitter_dur_df["max_decoding"])
-        ax.plot(jitter_dur_df["trials_proportion"], jitter_dur_df["max_decoding"])
-        ax.set_xlabel('Trials proportion')
-        ax.set_ylabel('Peak accuracy')
-        # Save the figure to a file:
-        plt.savefig(Path(no_jitter_save_root, "{}ms_peak_decoding_scores.png".format(jitter_dur)))
+    # Plot the max decoding accuracy as a function of proportion of trials affected:
+    fig, ax = plt.subplots(figsize=fig_size)
+    ax.scatter(no_jitter_config["trigger_shuffle_proportion"], no_jitter_config["max_decoding"])
+    ax.plot(no_jitter_config["trigger_shuffle_proportion"], no_jitter_config["max_decoding"])
+    ax.set_xlabel('Trials proportion')
+    ax.set_ylabel('Shuffled labels peak accuracy')
+    # Save the figure to a file:
+    plt.savefig(Path(no_jitter_save_root, "shuffle_peak_decoding_scores.png"))
 
     print("DONE!")
 
