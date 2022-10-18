@@ -61,6 +61,7 @@ def compare_simulated_jitters():
                 "name": config["name"],
                 "jitter_amp_ms": config["trigger_jitter_parameter"]["jitter_amp_ms"],
                 "trials_proportion": config["trigger_jitter_parameter"]["trials_proportion"],
+                "trigger_shuffle_proportion": config["trigger_shuffle_parameter"]["trials_proportion"],
                 "max_decoding": max_decoding
             }, index=[0]))
         else:
@@ -68,6 +69,7 @@ def compare_simulated_jitters():
                 "name": config["name"],
                 "jitter_amp_ms": 0,
                 "trials_proportion": 0,
+                "trigger_shuffle_proportion": config["trigger_shuffle_parameter"]["trials_proportion"],
                 "max_decoding": max_decoding
             }, index=[0]))
     configs_df = configs_df.reset_index(drop=True)
@@ -82,8 +84,12 @@ def compare_simulated_jitters():
     fig, ax = plt.subplots(figsize=fig_size)
     for ind, key in enumerate(results.keys()):
         # Get the parameter:
-        param = configs_df.loc[configs_df["name"] == key, ["jitter_amp_ms", "trials_proportion"]]
-        label = "{}ms, {}%trials".format(param["jitter_amp_ms"].values[0], param["trials_proportion"].values[0] * 100)
+        param = configs_df.loc[configs_df["name"] == key, ["jitter_amp_ms", "trials_proportion",
+                                                           "trigger_shuffle_proportion"]]
+        label = "{}ms, {}%trials, {}%shuffle".format(param["jitter_amp_ms"].values[0],
+                                                     param["trials_proportion"].values[0] * 100,
+                                                     param["trigger_shuffle_proportion"].values[0] * 100
+                                                     )
         # Average across all the different labels:
         data = np.mean(np.array([results[key][label] for label in results[key].keys()]), axis=0)
         avg, low_ci, up_ci = mean_confidence_interval(data)
@@ -105,9 +111,12 @@ def compare_simulated_jitters():
         fig, ax = plt.subplots(figsize=fig_size)
         for ind, key in enumerate(results.keys()):
             # Average across all the different labels:
-            param = configs_df.loc[configs_df["name"] == key, ["jitter_amp_ms", "trials_proportion"]]
-            line_label = "{}ms, {}%trials".format(param["jitter_amp_ms"].values[0],
-                                                  param["trials_proportion"].values[0] * 100)
+            param = configs_df.loc[configs_df["name"] == key, ["jitter_amp_ms", "trials_proportion",
+                                                               "trigger_shuffle_proportion"]]
+            line_label = "{}ms, {}%trials, {}%shuffle".format(param["jitter_amp_ms"].values[0],
+                                                              param["trials_proportion"].values[0] * 100,
+                                                              param["trigger_shuffle_proportion"].values[0] * 100
+                                                              )
             avg, low_ci, up_ci = mean_confidence_interval(results[key][label])
             times = np.linspace(t0, tmax, num=avg.shape[-1])
             ax.plot(times, avg, label=line_label)
