@@ -7,7 +7,7 @@
   "preprocess_steps": "unknown",
   "signal": "erp",
   "analysis": "mvpa",
-  "name": "cate_16ms_jit_50perc_no_shuf",
+  "name": "cate_16ms_jit_twot_20perc_no_shuf",
   "conditions": ["human_face", "human_face", "animal_body", "animal_face", "fruit_vegetable", "inanimate_object"],
   "labels_condition": "category",
   "classifier": "lda",
@@ -17,8 +17,10 @@
   "n_features": 30,
   "n_jobs": 8,
   "trigger_jitter_parameter": {
-    "jitter_amp_ms": 16,
-    "trials_proportion": 0.5
+    "refresh_rate": 16,
+    "trials_proportion": 0.2,
+    "tail": "upper",
+    "max_jitter": 16
   },
   "trigger_shuffle_parameter": {
     "trials_proportion": 0.0
