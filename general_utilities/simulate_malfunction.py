@@ -54,7 +54,7 @@ def generate_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both
         trials_jitter_disc[np.where(trials_jitter_disc > 0)] = 0
     # Make sure that the proportion of trials for which there are jitter matches our expectations
     assert np.abs(trials_proportion - (len(np.where(np.abs(trials_jitter_disc) >= refresh_rate)[0]) /
-                                       len(trials_jitter_disc))) < 0.01, \
+                                       len(trials_jitter_disc))) < 0.1, \
         "The proportion of jittered trials does not match expectations!"
 
     return trials_jitter_disc
@@ -67,11 +67,13 @@ def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", m
     specifies the proportion of trials that has a jitter. In other words, when specifying a trial proportion of 10%,
     this means that the probability for each trial to have a jitter of 16ms or above is 10%, following a normal
     distribution.
-    :param epochs:
-    :param refresh_rate:
-    :param trials_proportion:
-    :param tail:
-    :param max_jitter:
+    :param epochs: (mne epochs object) contains trials for which to inject jitter
+    :param refresh_rate: (int) refresh rate of the screen used in experiment to simulate jitter. Jitter can only
+    be a multiple of the refresh rate.
+    :param trials_proportion: (float) proportion of trials (between 0 and 1) for which to add jitter
+    :param tail: (string) tail of the distribution to simulate the jitter. If both, jitter can be both positive and
+    negative. If upper, strictly positive. If lower, only negative
+    :param max_jitter: (int) max jitter possible. If max jitter is 16ms, jitters cannot exceed +- 16ms.
     :return:
     """
     # Generate random jitters for each trials:
@@ -87,7 +89,10 @@ def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", m
 
     # Generate a new time axis to account for the most extreme jitters:
     min_jitter, max_jitter = np.min(trials_jitter_samp), np.max(trials_jitter_samp)
-    new_times = epochs.times[int(0 + max_jitter): int(- np.abs(min_jitter))]
+    if min_jitter < 0:
+        new_times = epochs.times[int(0 + max_jitter): int(- np.abs(min_jitter))]
+    else:
+        new_times = epochs.times[int(0 + max_jitter):]
     # Attributing the jitter to each trial:
     trials_data_jittered = []
     trial_times = []
@@ -95,20 +100,24 @@ def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", m
     for ind in range(data.shape[0]):
         # Get the jitter of this particular trial:
         jitter = trials_jitter_samp[ind]
-        # If we have a positive jitter, this means that the trial started later than expected. Counter intuitively
-        # such trials contain the data from t0 up until -jitter
+        # Here it gets a bit counter intuitive. It is the same as when changing from summer to winter hour: we are
+        # advancing our clocks by one hour, therefore it is one earlier. Wait what, no it's the other way around, right?
+        # Every one gets confused twice a year. Same here.
+        # When we have a positive jitter, that means that the stimulus was presented later than what we initially
+        # thought. That means that t0 is actually t1. This is simulated by getting rid of the last samples (shifting
+        # the data to the right) while shifting time forward (i.e. shifting time to the left).
         if jitter > 0:
             trials_data_jittered.append(data[ind, :, :int(-jitter)])
-            trial_times.append(epochs.times[:int(-jitter)])
-        elif jitter < 0:
+            trial_times.append(epochs.times[int(jitter):])
+        elif jitter < 0:  # And the opposit is true for negative jitter: the stimulus occured earlier than we think
             trials_data_jittered.append(data[ind, :, np.abs(int(jitter)):])
-            trial_times.append(epochs.times[np.abs(int(jitter)):])
+            trial_times.append(epochs.times[:int(jitter)])
         else:
             trials_data_jittered.append(data[ind, :, :])
             trial_times.append(epochs.times)
     # Creating an array to store the new data:
     new_data = np.zeros([len(trials_data_jittered), len(epochs.ch_names), len(new_times)])
-    # Looping through each trials to get the data of the new timeline:
+    # Looping through each trials to get the data to the new timeline:
     for trial_ind in range(new_data.shape[0]):
         samp_ind = [ind for ind in range(len(trial_times[trial_ind])) if trial_times[trial_ind][ind] in new_times]
         new_data[trial_ind, :, :] = trials_data_jittered[trial_ind][:, samp_ind]
@@ -119,7 +128,7 @@ def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", m
                              event_id=epochs.event_id)
     epochs.metadata = metadata
 
-    return trials_jitter_samp
+    return epochs
 
 
 def generate_jitter_old(epochs, jitter_amp_ms=16, trials_proportion=0.1):
