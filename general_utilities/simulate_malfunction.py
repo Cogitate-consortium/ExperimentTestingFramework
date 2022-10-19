@@ -1,11 +1,128 @@
 import numpy as np
 import mne
+import math
+from scipy.stats import norm
 
 
-# def jitter_from_distribution():
+def approximate_sigma(x, proba, loc=0):
+    """
+
+    :param x:
+    :param proba:
+    :param loc:
+    :return:
+    """
+    canditate_sigma = np.linspace(0.01, 100, num=10000)
+    obs_proba = np.zeros(canditate_sigma.shape)
+    for ind, sig in enumerate(canditate_sigma):
+        obs_proba[ind] = norm.cdf(-x, loc=loc, scale=sig)
+    # Find the sigma that leads to the proba closest to what we are after:
+    sigma = canditate_sigma[np.where(np.abs(obs_proba - proba) == np.min(np.abs(obs_proba - proba)))][0]
+    return sigma
 
 
-def generate_jitter(epochs, jitter_amp_ms=16, trials_proportion=0.1):
+def generate_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both", max_jitter=None):
+    """
+
+    :param n_trials:
+    :param refresh_rate:
+    :param trials_proportion:
+    :param tail:
+    :param max_jitter:
+    :return:
+    """
+    # Compute the sigma of a null distribution fitting the given parameters:
+    if tail != "both":
+        sigma = approximate_sigma(refresh_rate, trials_proportion)
+    else:
+        sigma = approximate_sigma(refresh_rate, trials_proportion / 2)
+    # Generate trials jitter:
+    trials_jitter_cont = np.random.normal(loc=0, scale=sigma, size=n_trials)
+
+    # Correct the jitters to be multiple of the refresh rate:
+    trials_jitter_disc = np.array([math.floor(jitter / refresh_rate) * refresh_rate if jitter > 0
+                                   else (math.floor(jitter / refresh_rate) + 1) * refresh_rate
+                                   for jitter in trials_jitter_cont])
+    # If there is a max jitter:
+    if max_jitter is not None:
+        trials_jitter_disc[np.where(trials_jitter_disc > max_jitter)] = max_jitter
+        trials_jitter_disc[np.where(trials_jitter_disc < -max_jitter)] = -max_jitter
+    # Handle the tails and make sure that the proportion roughly matches our expectations:
+    if tail == "upper":
+        trials_jitter_disc[np.where(trials_jitter_disc < 0)] = 0
+    elif tail == "lower":
+        trials_jitter_disc[np.where(trials_jitter_disc > 0)] = 0
+    # Make sure that the proportion of trials for which there are jitter matches our expectations
+    assert np.abs(trials_proportion - (len(np.where(np.abs(trials_jitter_disc) >= refresh_rate)[0]) /
+                                       len(trials_jitter_disc))) < 0.01, \
+        "The proportion of jittered trials does not match expectations!"
+
+    return trials_jitter_disc
+
+
+def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", max_jitter=None):
+    """
+    This function generates random jitter on the stimulus onset, simulating experiments malfunctions. The refresh rate
+    specifies the amplitude of the jitter (only multiple of the refresh rate are possible). The trial proportion
+    specifies the proportion of trials that has a jitter. In other words, when specifying a trial proportion of 10%,
+    this means that the probability for each trial to have a jitter of 16ms or above is 10%, following a normal
+    distribution.
+    :param epochs:
+    :param refresh_rate:
+    :param trials_proportion:
+    :param tail:
+    :param max_jitter:
+    :return:
+    """
+    # Generate random jitters for each trials:
+    trials_jitter_ms = generate_jitter(len(epochs), refresh_rate=refresh_rate,
+                                       trials_proportion=trials_proportion,
+                                       tail=tail, max_jitter=max_jitter)
+
+    # Convert ms to samples:
+    trials_jitter_samp = np.array([jitter * (epochs.info["sfreq"] / 1000) for jitter in trials_jitter_ms])
+
+    # Get the epochs data:
+    data = epochs.get_data()
+
+    # Generate a new time axis to account for the most extreme jitters:
+    min_jitter, max_jitter = np.min(trials_jitter_samp), np.max(trials_jitter_samp)
+    new_times = epochs.times[int(0 + max_jitter): int(- np.abs(min_jitter))]
+    # Attributing the jitter to each trial:
+    trials_data_jittered = []
+    trial_times = []
+    # Loop through each trial:
+    for ind in range(data.shape[0]):
+        # Get the jitter of this particular trial:
+        jitter = trials_jitter_samp[ind]
+        # If we have a positive jitter, this means that the trial started later than expected. Counter intuitively
+        # such trials contain the data from t0 up until -jitter
+        if jitter > 0:
+            trials_data_jittered.append(data[ind, :, :int(-jitter)])
+            trial_times.append(epochs.times[:int(-jitter)])
+        elif jitter < 0:
+            trials_data_jittered.append(data[ind, :, np.abs(int(jitter)):])
+            trial_times.append(epochs.times[np.abs(int(jitter)):])
+        else:
+            trials_data_jittered.append(data[ind, :, :])
+            trial_times.append(epochs.times)
+    # Creating an array to store the new data:
+    new_data = np.zeros([len(trials_data_jittered), len(epochs.ch_names), len(new_times)])
+    # Looping through each trials to get the data of the new timeline:
+    for trial_ind in range(new_data.shape[0]):
+        samp_ind = [ind for ind in range(len(trial_times[trial_ind])) if trial_times[trial_ind][ind] in new_times]
+        new_data[trial_ind, :, :] = trials_data_jittered[trial_ind][:, samp_ind]
+
+    # Putting everything back into an epochs object:
+    metadata = epochs.metadata
+    epochs = mne.EpochsArray(new_data, epochs.info, tmin=new_times[0], events=epochs.events,
+                             event_id=epochs.event_id)
+    epochs.metadata = metadata
+
+    return trials_jitter_samp
+
+
+def generate_jitter_old(epochs, jitter_amp_ms=16, trials_proportion=0.1):
     """
     This function enables introducing temporal jitter to mne epochs object according to a few set of parameters
     :param epochs: (mne epochs object) mne epochs object for which to introduce jitter
