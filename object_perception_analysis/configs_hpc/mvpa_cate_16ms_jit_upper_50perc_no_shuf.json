@@ -1,0 +1,28 @@
+{
+  "bids_root": "/mnt/beegfs/XNAT/workspace/001_testing_framework/object_processing/bids",
+  "ses": "1",
+  "data_type": "eeg",
+  "task": "object_processing",
+  "preprocess_folder": "epoching",
+  "preprocess_steps": "unknown",
+  "signal": "erp",
+  "analysis": "mvpa",
+  "name": "cate_16ms_jit_twot_50perc_no_shuf",
+  "conditions": ["human_face", "human_face", "animal_body", "animal_face", "fruit_vegetable", "inanimate_object"],
+  "labels_condition": "category",
+  "classifier": "lda",
+  "n_sample_window": 6,
+  "n_sample_steps": 3,
+  "n_cv": 10,
+  "n_features": 30,
+  "n_jobs": 8,
+  "trigger_jitter_parameter": {
+    "refresh_rate": 16,
+    "trials_proportion": 0.5,
+    "tail": "upper",
+    "max_jitter": 16
+  },
+  "trigger_shuffle_parameter": {
+    "trials_proportion": 0.0
+  }
+}
