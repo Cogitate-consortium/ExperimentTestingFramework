@@ -86,4 +86,4 @@ def load_epochs(bids_root, subject, session, data_type, preprocessing_folder, si
                       preprocessing_folder, signal, preprocessing_steps,
                       "sub-{}_ses-{}_task-{}_desc-epoching_{}-epo.fif".format(subject, session, task, data_type))
     # Return the read epochs:
-    return mne.read_epochs(epoch_file)
+    return mne.read_epochs(epoch_file, verbose="ERROR")

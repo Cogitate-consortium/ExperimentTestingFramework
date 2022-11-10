@@ -1,0 +1,42 @@
+{
+  "P1": {
+    "amplitude": 0.5,
+    "amplitude_limits": [0, 1],
+    "latency": 0.1,
+    "latency_limits": [0, 0.5],
+    "sigma": 0.02,
+    "sigma_limits": [0, 0.5]
+  },
+  "N1": {
+      "amplitude": -0.5,
+      "amplitude_limits": [-1, 0],
+      "latency": 0.18,
+      "latency_limits": [0, 0.5],
+      "sigma": 0.02,
+      "sigma_limits": [0, 0.5]
+  },
+  "P2": {
+      "amplitude": 0.5,
+      "amplitude_limits": [0, 1],
+      "latency": 0.2,
+      "latency_limits": [0, 0.5],
+      "sigma": 0.02,
+      "sigma_limits": [0, 0.5]
+  },
+  "N2": {
+      "amplitude": -0.5,
+      "amplitude_limits": [-1, 0],
+      "latency": 0.22,
+      "latency_limits": [0, 0.5],
+      "sigma": 0.02,
+      "sigma_limits": [0, 0.5]
+  },
+  "P3": {
+    "amplitude": 0.5,
+    "amplitude_limits": [0, 1],
+    "latency": 0.35,
+    "latency_limits": [0, 0.5],
+    "sigma": 0.05,
+    "sigma_limits": [0, 0.5]
+  }
+}
