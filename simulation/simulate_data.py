@@ -137,7 +137,7 @@ def simulate_epochs():
                                  "ieeg", "epoching", param["signal"], param["preprocess_steps"])
                 if not os.path.isdir(save_root):
                     os.makedirs(save_root)
-                fname = "sub-{}_ses-{}_task-{}_desc-epoching_ieeg-epo.fif".format(sub + 1, param["ses"],
+                fname = "sub-{}_ses-{}_task-{}_desc-epoching_eeg-epo.fif".format(sub + 1, param["ses"],
                                                                                   param["task"])
                 epochs.save(Path(save_root, fname), overwrite=True)
 
