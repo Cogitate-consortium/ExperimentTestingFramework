@@ -1,7 +1,7 @@
 {
   "P1": {
     "amplitude": 0.5,
-    "amplitude_limits": [0, 1],
+    "amplitude_limits": [0, 10],
     "latency": 0.1,
     "latency_limits": [0, 0.5],
     "sigma": 0.02,
@@ -9,7 +9,7 @@
   },
   "N1": {
       "amplitude": -0.5,
-      "amplitude_limits": [-1, 0],
+      "amplitude_limits": [-10, 0],
       "latency": 0.18,
       "latency_limits": [0, 0.5],
       "sigma": 0.02,
@@ -17,7 +17,7 @@
   },
   "P2": {
       "amplitude": 0.5,
-      "amplitude_limits": [0, 1],
+      "amplitude_limits": [0, 10],
       "latency": 0.2,
       "latency_limits": [0, 0.5],
       "sigma": 0.02,
@@ -25,7 +25,7 @@
   },
   "N2": {
       "amplitude": -0.5,
-      "amplitude_limits": [-1, 0],
+      "amplitude_limits": [-10, 0],
       "latency": 0.22,
       "latency_limits": [0, 0.5],
       "sigma": 0.02,
@@ -33,7 +33,7 @@
   },
   "P3": {
     "amplitude": 0.5,
-    "amplitude_limits": [0, 1],
+    "amplitude_limits": [0, 10],
     "latency": 0.35,
     "latency_limits": [0, 0.5],
     "sigma": 0.05,

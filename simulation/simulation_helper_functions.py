@@ -21,8 +21,8 @@ def generate_erp(times, comp_dict):
     """
     comps_list = []
     for comp in comp_dict:
-        comps_list.append(gaussian(times, comp_dict[comp]["amp"], comp_dict[comp]["latency"],
-                                   comp_dict[comp]["variance"]))
+        comps_list.append(gaussian(times, comp_dict[comp]["amplitude"], comp_dict[comp]["latency"],
+                                   comp_dict[comp]["sigma"]))
     return np.sum(np.array(comps_list), axis=0)
 
 
@@ -48,14 +48,14 @@ def adjust_comp(components_dict, effect_size_dict, sigma, conditions):
         # Adding that difference to the amplitude of the first condition:
         cond_comp_dict[conditions[0]][component] = {
             "latency": components_dict[component]["latency"],
-            "amp": components_dict[component]["amp"] + amp_diff,
-            "variance": components_dict[component]["variance"]
+            "amplitude": components_dict[component]["amplitude"] + amp_diff,
+            "sigma": components_dict[component]["sigma"]
         }
         # Subtracting it from the second:
         cond_comp_dict[conditions[1]][component] = {
             "latency": components_dict[component]["latency"],
-            "amp": components_dict[component]["amp"] - amp_diff,
-            "variance": components_dict[component]["variance"]
+            "amplitude": components_dict[component]["amplitude"] - amp_diff,
+            "sigma": components_dict[component]["sigma"]
         }
     return cond_comp_dict
 

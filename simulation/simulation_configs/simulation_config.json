@@ -1,23 +1,24 @@
 {
   "bids_root": "C:\\Users\\alexander.lepauvre\\Documents\\PhD\\Experimental_testing_framework\\data\\simulation\\bids",
+  "n_subjects": 25,
   "ses": "1",
   "data_type": "eeg",
-  "task": "sim_noise_free",
+  "task": "sim",
   "preprocess_folder": "epoching",
   "preprocess_steps": "unknown",
   "signal": "erp",
   "name": "noise_free",
-  "components_file": "components.json",
+  "components_file": "components_posteriors.json",
   "t0": -0.5,
   "tmax": 1.0,
   "sfreq": 1000,
   "conditions": ["cond_1", "cond_2"],
   "metadata_col": ["condition", "event_id", "onset"],
-  "n_trials_per_cond": 50,
+  "n_trials_per_cond": 200,
   "n_channels": 1,
   "effect_size": {
     "baseline": 0,
-    "P1": 2,
+    "P1": 1,
     "N1": 0,
     "P2": 0,
     "N2": 0,
@@ -25,7 +26,7 @@
   },
   "noise": {
     "mean": 0,
-    "sigma": 2,
+    "sigma": 0.01,
     "autocorrelation_ms": 10
   }
 }
