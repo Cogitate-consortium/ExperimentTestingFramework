@@ -196,8 +196,6 @@ def shuffle_triggers(epochs, trials_proportion=0.05):
     new_events = epochs.events[new_ind, 2]
     epochs.events[:, 2] = new_events
     new_metadata = epochs.metadata.iloc[new_ind].reset_index(drop=True)
-
-    epochs.events = new_events
     epochs.metadata = new_metadata
 
     return epochs

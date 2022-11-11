@@ -14,7 +14,7 @@
   "sfreq": 1000,
   "conditions": ["cond_1", "cond_2"],
   "metadata_col": ["condition", "event_id", "onset"],
-  "n_trials_per_cond": 200,
+  "n_trials_per_cond": 40,
   "n_channels": 1,
   "effect_size": {
     "baseline": 0,
@@ -27,6 +27,6 @@
   "noise": {
     "mean": 0,
     "sigma": 0.01,
-    "autocorrelation_ms": 10
+    "autocorrelation_ms": 2
   }
 }

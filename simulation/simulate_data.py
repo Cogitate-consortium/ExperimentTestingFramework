@@ -124,7 +124,7 @@ def simulate_epochs():
             ax.text(0.6, 0.2, "Expected Effect size={:.2f}".format(param["effect_size"]["P1"]))
             ax.text(0.6, 0.1, "Observed P1  std= {:.2f}".format(p1_std))
             ax.text(0.6, 0, "Observed Effect size={:.2f}".format(f_size))
-            # plt.show()
+            plt.show()
 
             # ==========================================================================================================
             do = True
@@ -134,7 +134,7 @@ def simulate_epochs():
                 print("Saving the results")
                 save_root = Path(param["bids_root"], "derivatives", "preprocessing",
                                  "sub-" + str(sub + 1), "ses-" + param["ses"],
-                                 "ieeg", "epoching", param["signal"], param["preprocess_steps"])
+                                 "eeg", "epoching", param["signal"], param["preprocess_steps"])
                 if not os.path.isdir(save_root):
                     os.makedirs(save_root)
                 fname = "sub-{}_ses-{}_task-{}_desc-epoching_eeg-epo.fif".format(sub + 1, param["ses"],
