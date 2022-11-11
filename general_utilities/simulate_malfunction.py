@@ -53,9 +53,12 @@ def generate_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both
     elif tail == "lower":
         trials_jitter_disc[np.where(trials_jitter_disc > 0)] = 0
     # Make sure that the proportion of trials for which there are jitter matches our expectations
-    assert np.abs(trials_proportion - (len(np.where(np.abs(trials_jitter_disc) >= refresh_rate)[0]) /
-                                       len(trials_jitter_disc))) < 0.1, \
-        "The proportion of jittered trials does not match expectations!"
+    if np.abs(trials_proportion - (len(np.where(np.abs(trials_jitter_disc) >= refresh_rate)[0]) /
+                                   len(trials_jitter_disc))) > 0.1:
+        # If not, rerun the functions:
+        trials_jitter_disc = \
+            generate_jitter(n_trials, refresh_rate=refresh_rate, trials_proportion=trials_proportion,
+                            tail=tail, max_jitter=max_jitter)
 
     return trials_jitter_disc
 
