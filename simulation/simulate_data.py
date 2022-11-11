@@ -124,7 +124,7 @@ def simulate_epochs():
             ax.text(0.6, 0.2, "Expected Effect size={:.2f}".format(param["effect_size"]["P1"]))
             ax.text(0.6, 0.1, "Observed P1  std= {:.2f}".format(p1_std))
             ax.text(0.6, 0, "Observed Effect size={:.2f}".format(f_size))
-            plt.show()
+            # plt.show()
 
             # ==========================================================================================================
             do = True
@@ -143,8 +143,11 @@ def simulate_epochs():
                 # Save the config to json too:
                 fname = "sub-{}_ses-{}_task-{}_desc-config.json".format(sub + 1, param["ses"],
                                                                         param["task"])
-                with open(fname, 'w') as f:
+                with open(Path(save_root, fname), 'w') as f:
                     json.dump(param, f)
+                # Finally, save the pic:
+                plt.savefig(Path(save_root, "{}-evoked.png".format(param["task"])))
+                plt.close()
 
 
 if __name__ == "__main__":
