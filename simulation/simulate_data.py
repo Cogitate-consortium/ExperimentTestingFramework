@@ -14,7 +14,6 @@ from simulation.simulation_helper_functions import adjust_comp, generate_erp
 
 
 def simulate_epochs():
-
     # ============================================================================================
     # Parsing input and getting the configs:
     parser = argparse.ArgumentParser(description="Arguments for simulate_epochs")
@@ -80,7 +79,8 @@ def simulate_epochs():
             # Generate the events:
             conditions = [[cond] * param["n_trials_per_cond"] for cond in cond_comp_dict.keys()]
             evts_ids = [[ind] * param["n_trials_per_cond"] for ind, cond in enumerate(cond_comp_dict.keys())]
-            onsets = (np.linspace(0, (param["tmax"] - param["t0"]) * param["n_trials_per_cond"] * len(param["conditions"]),
+            onsets = (np.linspace(0,
+                                  (param["tmax"] - param["t0"]) * param["n_trials_per_cond"] * len(param["conditions"]),
                                   param["n_trials_per_cond"] * len(param["conditions"]), endpoint=False)
                       + np.abs(param["t0"]))
             # Add all of that into the metadata:
@@ -119,7 +119,7 @@ def simulate_epochs():
             ax.legend()
             ax.set_ylabel("Time (s)")
             ax.set_ylabel("Amplitude mV")
-            f_size = (p1_amp["cond_1"] - p1_amp["cond_2"])/p1_std
+            f_size = (p1_amp["cond_1"] - p1_amp["cond_2"]) / p1_std
             ax.text(0.6, 0.3, "Expected  std= {:.2f}".format(param["noise"]["sigma"]))
             ax.text(0.6, 0.2, "Expected Effect size={:.2f}".format(param["effect_size"]["P1"]))
             ax.text(0.6, 0.1, "Observed P1  std= {:.2f}".format(p1_std))
@@ -138,8 +138,13 @@ def simulate_epochs():
                 if not os.path.isdir(save_root):
                     os.makedirs(save_root)
                 fname = "sub-{}_ses-{}_task-{}_desc-epoching_eeg-epo.fif".format(sub + 1, param["ses"],
-                                                                                  param["task"])
+                                                                                 param["task"])
                 epochs.save(Path(save_root, fname), overwrite=True)
+                # Save the config to json too:
+                fname = "sub-{}_ses-{}_task-{}_desc-config.json".format(sub + 1, param["ses"],
+                                                                        param["task"])
+                with open(fname, 'w') as f:
+                    json.dump(param, f)
 
 
 if __name__ == "__main__":
