@@ -35,7 +35,12 @@ def mat2mne(matfile):
     # Extract the relevant info:
     n_channels = eeg_mat["X_3D"].shape[0]
     sfreq = eeg_mat["Fs"][0][0]
-    ch_names = [f'EEG{n:02}' for n in range(1, n_channels + 1)]
+    # Get the standard montage:
+    montage = mne.channels.make_standard_montage('GSN-HydroCel-128')
+    # Remove the four last channels:
+    montage.ch_names = montage.ch_names[: 124]
+    montage.dig = montage.dig[: 127]
+    ch_names = montage.ch_names
     ch_types = "eeg"
     # Create the info:
     info = mne.create_info(ch_names, sfreq, ch_types=ch_types)
@@ -70,7 +75,7 @@ def mat2mne(matfile):
     data = np.moveaxis(eeg_mat["X_3D"], [0, 2], [1, 0])
     # Generate the epochs:
     epochs = mne.EpochsArray(data, info, tmin=0, events=events, event_id=event_dict)
-
+    epochs.set_montage(montage)
     # Adding metadata:
     metadata = pd.DataFrame(data=[val.split("/") for val in description], columns=["category", "examplar"],
                             index=range(len(epochs)))
