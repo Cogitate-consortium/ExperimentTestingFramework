@@ -39,7 +39,7 @@ def gmm_from_data(components_priors, channels=None,
     # List the subjects:
     subjects_list = list_subjects(Path(bids_root, "derivatives", "preprocessing"), prefix="sub-")
     # Loading single subjects data and performing some operations:
-    evk = []
+    evks = []
     for subject in subjects_list:
         if verbose:
             print("loading sub-{} data".format(subject))
@@ -48,9 +48,9 @@ def gmm_from_data(components_priors, channels=None,
                              session, data_type, preprocessing_folder,
                              signal, preprocessing_steps, task)
         # Average the data in each sensor:
-        evk.append(epochs.average())
-    # Average the evk across subjects:
-    grand_avg = mne.grand_average(evk)
+        evks.append(epochs.average())
+    # Average the evks across subjects:
+    grand_avg = mne.grand_average(evks)
 
     # ==================================================================================================================
     # Fitting the gaussian mixture model:
@@ -78,28 +78,65 @@ def gmm_from_data(components_priors, channels=None,
     components_posteriors = {channel: {
         component: {
             "amplitude": None,
+            "amplitude_std": None,
             "latency": None,
-            "sigma": None
+            "latency_std": None,
+            "sigma": None,
+            "sigma_std": None,
         }
         for component in components_priors.keys()
     } for channel in channels}
     for channel in channels:
+        # Computing the components at the population level:
         popt, pcov = curve_fit(gaussian_5_comp, epochs.times,
-                                              np.squeeze(grand_avg.copy().pick(channel).data.T),
-                                              p0=amplitudes + latencies + sigmas,
-                                              bounds=bounds, method="trf")
+                               np.squeeze(grand_avg.copy().pick(channel).data.T),
+                               p0=amplitudes + latencies + sigmas,
+                               bounds=bounds, method="trf")
+        # Getting the amplitude standard deviation for each component by fitting the gaussian mixture model to each
+        # subject separately:
+        sub_fits = []
+        for ind, evk in enumerate(evks):
+            sub_popt, sub_pcov = curve_fit(gaussian_5_comp, epochs.times,
+                                           np.squeeze(evk.copy().pick(channel).data.T),
+                                           p0=amplitudes + latencies + sigmas,
+                                           bounds=bounds, method="trf")
+            # Plot the single subjects fits to make sure that they make sense:
+            fig, ax = plt.subplots(2, figsize=[12, 8])
+            ax[0].plot(epochs.times, np.squeeze(evk.copy().pick(channel).data.T), label="data")
+            ax[0].plot(epochs.times, gaussian_5_comp(epochs.times, *sub_popt), label="fit")
+            ax[0].set_title("Observed and fitted ERP")
+            ax[0].legend()
+            # Plot separately each gaussian:
+            for i, component in enumerate(components_posteriors[channel].keys()):
+                ax[1].plot(epochs.times, gaussian(epochs.times, sub_popt[i],
+                                                  sub_popt[i + len(components_posteriors[channel])],
+                                                  sub_popt[i + len(components_posteriors[channel]) * 2]),
+                           label=component)
+            ax[1].legend()
+            ax[1].set_title("Fitted components for sub-{}".format(ind))
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig("Fitted_components_sub-{}.png".format(ind))
+            sub_fits.append(sub_popt)
+        # Compute the standard deviation of each parameter:
+        sub_param_std = list(np.std(np.array(sub_fits), axis=0))
         # Convert the fitted parameters to a dict:
         for ind, component in enumerate(components_posteriors[channel].keys()):
             components_posteriors[channel][component]["amplitude"] = popt[ind]
+            components_posteriors[channel][component]["amplitude_std"] = sub_param_std[ind]
             components_posteriors[channel][component]["latency"] = popt[ind + len(components_posteriors[channel])]
+            components_posteriors[channel][component]["latency_std"] = \
+                sub_param_std[ind + len(components_posteriors[channel])]
             components_posteriors[channel][component]["sigma"] = popt[ind + len(components_posteriors[channel]) * 2]
+            components_posteriors[channel][component]["sigma_std"] = \
+                sub_param_std[ind + len(components_posteriors[channel]) * 2]
         if verbose:
             for component in components_posteriors[channel]:
                 print("Channel: {}, comp: {} :".format(channel, component))
                 print("   Amplitude: {}".format(components_posteriors[channel][component]["amplitude"]))
                 print("   Latency: {}".format(components_posteriors[channel][component]["latency"]))
                 print("   Sigma: {}".format(components_posteriors[channel][component]["sigma"]))
-        fig, ax = plt.subplots(2)
+        fig, ax = plt.subplots(2, figsize=[12, 8])
         ax[0].plot(epochs.times, np.squeeze(grand_avg.copy().pick(channel).data.T), label="data")
         ax[0].plot(epochs.times, gaussian_5_comp(epochs.times, *popt), label="fit")
         ax[0].set_title("Observed and fitted ERP")
@@ -113,6 +150,7 @@ def gmm_from_data(components_priors, channels=None,
         ax[1].legend()
         ax[1].set_title("Fitted components")
         plt.legend()
+        plt.tight_layout()
         plt.savefig("Fitted components.png")
     with open('components_posteriors.json', 'w') as f:
         json.dump(components_posteriors, f)
