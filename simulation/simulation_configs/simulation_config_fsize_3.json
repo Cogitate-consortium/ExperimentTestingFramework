@@ -11,20 +11,22 @@
   "components_file": "components_posteriors.json",
   "t0": -0.5,
   "tmax": 1.0,
-  "sfreq": 1000,
+  "sfreq": 200,
   "conditions": ["cond_1", "cond_2"],
   "metadata_col": ["condition", "event_id", "onset"],
   "n_trials_per_cond": 40,
-  "n_channels": 1,
+  "channels": ["E77"],
   "effect_size": {
     "baseline": 0,
-    "P1": 1.5,
+    "P1": 0.6,
     "N1": 0,
     "P2": 0,
     "N2": 0,
     "P3": 0
   },
-  "noise": {
+  "peak_noise": true,
+  "within_subject_noise": 0.01,
+  "recording_noise": {
     "mean": 0,
     "sigma": 0.01,
     "autocorrelation_ms": 2
