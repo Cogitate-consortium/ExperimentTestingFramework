@@ -14,7 +14,7 @@
   "sfreq": 200,
   "conditions": ["cond_1", "cond_2"],
   "metadata_col": ["condition", "event_id", "onset"],
-  "n_trials_per_cond": 40,
+  "n_trials_per_cond": 50,
   "channels": ["E77"],
   "effect_size": {
     "baseline": 0,

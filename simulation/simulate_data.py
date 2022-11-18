@@ -121,7 +121,7 @@ def simulate_epochs(channels):
             # plt.show()
             plt.close()
             # ==========================================================================================================
-            do = False
+            do = True
             if do:
                 # Save the data:
                 print("=" * 40)
