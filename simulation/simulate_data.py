@@ -111,11 +111,6 @@ def simulate_epochs(channels):
             }
             # Compute the P1 effect size:
             p1_epochs = epochs.copy().crop(tmin=-0.2, tmax=0.0)
-            p1_amp = {
-                "cond_1": np.mean(p1_epochs.copy()["cond_1"].average().data),
-                "cond_2": np.mean(p1_epochs.copy()["cond_2"].average().data)
-            }
-            p1_std = np.std([p1_epochs.copy()["cond_1"].average().data, p1_epochs.copy()["cond_2"].average().data])
             fig, ax = plt.subplots()
             ax.plot(times, np.squeeze(evk["cond_1"]), label="cond_1", c="blue")
             # ax.plot(times, np.squeeze(epochs.copy()["cond_1"]).T, "--", c="k", linewidth=1, alpha=0.5)
