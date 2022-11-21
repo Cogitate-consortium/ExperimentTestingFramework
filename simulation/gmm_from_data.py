@@ -137,8 +137,13 @@ def gmm_from_data(components_priors, channels=None,
                 print("   Latency: {}".format(components_posteriors[channel][component]["latency"]))
                 print("   Sigma: {}".format(components_posteriors[channel][component]["sigma"]))
         fig, ax = plt.subplots(2, figsize=[12, 8])
-        ax[0].plot(epochs.times, np.squeeze(grand_avg.copy().pick(channel).data.T), label="data")
-        ax[0].plot(epochs.times, gaussian_5_comp(epochs.times, *popt), label="fit")
+        # Plot single subjects ERPs:
+        for evk in evks:
+            ax[0].plot(epochs.times, evk.copy().pick(channel).data.T, linewidth=0.5, color="gray")
+        # Plot the grand average:
+        ax[0].plot(epochs.times, np.squeeze(grand_avg.copy().pick(channel).data.T),
+                   label="Grand average", color="k", linewidth=3)
+        ax[0].plot(epochs.times, gaussian_5_comp(epochs.times, *popt), label="fit", color="r", linewidth=1)
         ax[0].set_title("Observed and fitted ERP")
         ax[0].legend()
         # Plot separately each gaussian:
