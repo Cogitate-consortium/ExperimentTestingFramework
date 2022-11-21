@@ -1,6 +1,6 @@
 {
   "bids_root": "C:\\Users\\alexander.lepauvre\\Documents\\PhD\\Experimental_testing_framework\\data\\simulation\\bids",
-  "n_subjects": 25,
+  "n_subjects": 40,
   "ses": "1",
   "data_type": "eeg",
   "task": "sim_1",
@@ -14,7 +14,7 @@
   "sfreq": 200,
   "conditions": ["cond_1", "cond_2"],
   "metadata_col": ["condition", "event_id", "onset"],
-  "n_trials_per_cond": 50,
+  "n_trials_per_cond": 100,
   "channels": ["E77"],
   "effect_size": {
     "baseline": 0,
