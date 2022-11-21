@@ -119,7 +119,6 @@ def simulate_epochs(channels):
             ax.set_ylabel("Time (s)")
             ax.set_ylabel("Amplitude mV")
             # plt.show()
-            plt.close()
             # ==========================================================================================================
             do = True
             if do:
