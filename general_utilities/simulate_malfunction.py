@@ -23,7 +23,7 @@ def approximate_sigma(x, proba, loc=0):
     return sigma
 
 
-def generate_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both", max_jitter=None):
+def generate_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both", max_jitter=None, precision=0.001):
     """
 
     :param n_trials:
@@ -31,6 +31,7 @@ def generate_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both
     :param trials_proportion:
     :param tail:
     :param max_jitter:
+    :param precision:
     :return:
     """
     # Compute the sigma of a null distribution fitting the given parameters:
@@ -56,16 +57,16 @@ def generate_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both
         trials_jitter_disc[np.where(trials_jitter_disc > 0)] = 0
     # Make sure that the proportion of trials for which there are jitter matches our expectations
     if np.abs(trials_proportion - (len(np.where(np.abs(trials_jitter_disc) >= refresh_rate)[0]) /
-                                   len(trials_jitter_disc))) > 0.1:
+                                   len(trials_jitter_disc))) > precision:
         # If not, rerun the functions:
         trials_jitter_disc = \
             generate_jitter(n_trials, refresh_rate=refresh_rate, trials_proportion=trials_proportion,
-                            tail=tail, max_jitter=max_jitter)
+                            tail=tail, max_jitter=max_jitter, precision=precision)
 
     return trials_jitter_disc
 
 
-def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", max_jitter=None):
+def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", max_jitter=None, precision=0.001):
     """
     This function generates random jitter on the stimulus onset, simulating experiments malfunctions. The refresh rate
     specifies the amplitude of the jitter (only multiple of the refresh rate are possible). The trial proportion
@@ -79,12 +80,14 @@ def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", m
     :param tail: (string) tail of the distribution to simulate the jitter. If both, jitter can be both positive and
     negative. If upper, strictly positive. If lower, only negative
     :param max_jitter: (int) max jitter possible. If max jitter is 16ms, jitters cannot exceed +- 16ms.
+    :param precision:
     :return:
     """
     # Generate random jitters for each trials:
     trials_jitter_ms = generate_jitter(len(epochs), refresh_rate=refresh_rate,
                                        trials_proportion=trials_proportion,
-                                       tail=tail, max_jitter=max_jitter)
+                                       tail=tail, max_jitter=max_jitter,
+                                       precision=precision)
 
     # Convert ms to samples:
     trials_jitter_samp = np.array([jitter * (epochs.info["sfreq"] / 1000) for jitter in trials_jitter_ms])
@@ -114,7 +117,7 @@ def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", m
         if jitter > 0:
             trials_data_jittered.append(data[ind, :, :int(-jitter)])
             trial_times.append(epochs.times[int(jitter):])
-        elif jitter < 0:  # And the opposit is true for negative jitter: the stimulus occured earlier than we think
+        elif jitter < 0:  # And the opposite is true for negative jitter: the stimulus occured earlier than we think
             trials_data_jittered.append(data[ind, :, np.abs(int(jitter)):])
             trial_times.append(epochs.times[:int(jitter)])
         else:
