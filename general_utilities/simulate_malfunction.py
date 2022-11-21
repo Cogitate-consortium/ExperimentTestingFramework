@@ -23,6 +23,31 @@ def approximate_sigma(x, proba, loc=0):
     return sigma
 
 
+def generate_exact_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both"):
+    """
+
+    :param n_trials:
+    :param refresh_rate:
+    :param trials_proportion:
+    :param tail:
+    :return:
+    """
+    # Generate an array to store the jitters:
+    trial_jitter = np.zeros(n_trials)
+    # Randomly pick the trials to add jitter to:
+    trial_jitter_ind = np.random.choice(n_trials, int(trials_proportion * n_trials), replace=False)
+    # Add the jitter to these trials:
+    trial_jitter[trial_jitter_ind] = refresh_rate
+    # Handle the tails:
+    if tail == "both":
+        neg_jit_ind = np.random.choice(trial_jitter_ind, int(len(trial_jitter_ind) / 2), replace=False)
+        trial_jitter[neg_jit_ind] = trial_jitter[neg_jit_ind] * -1
+    if tail == "lower":
+        trial_jitter[trial_jitter_ind] = trial_jitter[trial_jitter_ind] * -1
+
+    return trial_jitter
+
+
 def generate_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both", max_jitter=None, precision=0.001):
     """
 
@@ -66,7 +91,8 @@ def generate_jitter(n_trials, refresh_rate=16, trials_proportion=0.1, tail="both
     return trials_jitter_disc
 
 
-def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", max_jitter=None, precision=0.001):
+def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", max_jitter=None, precision=0.001,
+                  exact_jitter=True):
     """
     This function generates random jitter on the stimulus onset, simulating experiments malfunctions. The refresh rate
     specifies the amplitude of the jitter (only multiple of the refresh rate are possible). The trial proportion
@@ -81,13 +107,19 @@ def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", m
     negative. If upper, strictly positive. If lower, only negative
     :param max_jitter: (int) max jitter possible. If max jitter is 16ms, jitters cannot exceed +- 16ms.
     :param precision:
+    :param exact_jitter:
     :return:
     """
     # Generate random jitters for each trials:
-    trials_jitter_ms = generate_jitter(len(epochs), refresh_rate=refresh_rate,
-                                       trials_proportion=trials_proportion,
-                                       tail=tail, max_jitter=max_jitter,
-                                       precision=precision)
+    if exact_jitter:
+        trials_jitter_ms = generate_exact_jitter(len(epochs), refresh_rate=refresh_rate,
+                                                 trials_proportion=trials_proportion,
+                                                 tail=tail)
+    else:
+        trials_jitter_ms = generate_jitter(len(epochs), refresh_rate=refresh_rate,
+                                           trials_proportion=trials_proportion,
+                                           tail=tail, max_jitter=max_jitter,
+                                           precision=precision)
 
     # Convert ms to samples:
     trials_jitter_samp = np.array([jitter * (epochs.info["sfreq"] / 1000) for jitter in trials_jitter_ms])

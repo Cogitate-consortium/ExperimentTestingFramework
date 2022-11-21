@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from time import time
 from general_utilities.path_helper_function import find_files, path_generator, list_subjects, load_epochs
 from general_utilities.simulate_malfunction import jitter_trials, shuffle_triggers
 from general_utilities.data_helper_function import mean_confidence_interval
@@ -51,6 +51,7 @@ def erp_analysis():
         # Generate the name of the columns to store everything:
         results = pd.DataFrame()
         for subject in subjects_list:
+            start = time()
             # if subject not in test_subs:
             #     continue
             print("Analyzing sub-{}".format(subject))
@@ -106,6 +107,7 @@ def erp_analysis():
                                 "evoked_diff": evk_diff,
                                 **cond_means
                             }, index=[0]))
+            print("Time for a subject={:.2f}".format(time() - start))
 
         # Save the results to file:
         results_to_save = results.loc[:, results.columns != "evoked"]
