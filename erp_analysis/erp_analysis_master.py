@@ -185,7 +185,7 @@ def erp_analysis():
         # ================================================================================================
         # Plot the peak and latency:
         # Looping through each component again:
-        for component in results["component"]:
+        for component in results["component"].unique():
             # Get all the data for this component:
             comp_results = results.loc[results["component"] == component]
             # Extract the data for plotting jitter without shuffle and the other way around:
