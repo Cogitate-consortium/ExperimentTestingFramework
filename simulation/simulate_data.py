@@ -66,10 +66,11 @@ def simulate_epochs(channels):
                     noise = np.random.normal(noise_mv,
                                              scale=param["recording_noise"]["sigma"],
                                              size=erp.shape)
-                    filt_kern = scipy.signal.boxcar(int(param["recording_noise"]["autocorrelation_ms"] * 1000 /
-                                                        param["sfreq"]))
-                    noise = np.array([scipy.signal.convolve(noise[row, :], filt_kern, mode="same")
-                                      for row in range(noise.shape[0])])
+                    if param["recording_noise"]["autocorrelation_ms"] != 0:
+                        filt_kern = scipy.signal.boxcar(int(param["recording_noise"]["autocorrelation_ms"] * 1000 /
+                                                            param["sfreq"]))
+                        noise = np.array([scipy.signal.convolve(noise[row, :], filt_kern, mode="same")
+                                          for row in range(noise.shape[0])])
                     erp = np.add(erp, noise)
                     data[ctr:ctr + param["n_trials_per_cond"], ind, :] = erp
                     ctr += param["n_trials_per_cond"]
