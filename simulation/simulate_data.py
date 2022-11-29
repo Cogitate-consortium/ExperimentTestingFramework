@@ -10,7 +10,7 @@ import numpy as np
 from pathlib import Path
 
 from general_utilities.path_helper_function import find_files
-from simulation.simulation_helper_functions import adjust_comp, generate_erp, gen_intersubject_noise
+from simulation.simulation_helper_functions import adjust_comp, generate_erp, convert_noise
 
 
 def simulate_epochs(channels):
@@ -50,21 +50,20 @@ def simulate_epochs(channels):
         for sub in range(param["n_subjects"]):
             print("Simulate sub-{} data".format(sub + 1))
             for ind, channel in enumerate(param["channels"]):
+                # The noise is expressed as a percentage of the variance observed in the noise free data:
+                noise_mv = convert_noise(times, components_dict[channel], param["recording_noise"]["sigma"])
                 # Adjusting the mean of each components amplitude to account for the effect size:
-                cond_comp_dict = adjust_comp(components_dict[channel], param["effect_size"], param["conditions"])
-
-                # Add between subjects noise, i.e. differences in the components mean peak amplitudes:
-                subjects_param_dict = gen_intersubject_noise(cond_comp_dict, range(param["n_subjects"]),
-                                                             peak_noise=param["peak_noise"])
+                cond_comp_dict = adjust_comp(components_dict[channel], param["effect_size"], param["conditions"],
+                                             noise_mv)
                 # Loop through each condition:
                 ctr = 0
                 for cond in cond_comp_dict.keys():
                     # Generate single trials noise:
-                    erp = np.array([generate_erp(times, subjects_param_dict[sub][cond],
+                    erp = np.array([generate_erp(times, cond_comp_dict[cond],
                                                  peak_noise=param["within_subject_noise"])
                                     for _ in range(param["n_trials_per_cond"])])
                     # Generate the noise array:
-                    noise = np.random.normal(param["recording_noise"]["mean"],
+                    noise = np.random.normal(noise_mv,
                                              scale=param["recording_noise"]["sigma"],
                                              size=erp.shape)
                     filt_kern = scipy.signal.boxcar(int(param["recording_noise"]["autocorrelation_ms"] * 1000 /

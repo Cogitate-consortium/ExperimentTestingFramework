@@ -12,6 +12,22 @@ def gaussian_5_comp(x, a1, a2, a3, a4, a5, mu1, mu2, mu3, mu4, mu5, sig1, sig2, 
     return y
 
 
+def convert_noise(times, comp_dict, noise):
+    """
+    This function convert noise expressed as a proportion of variance in the noise free data into mV. In other words,
+    the noise can be expressed as 10% of the standard deviation of the noise free data. This function converts this 10%
+    in actual mV to add to the data. This enables more control over the noise, as a specific noise level in mV might be
+    10 times the dynamic range of the data
+    :param times: (numpy array) time array over which to generate the ERP
+    :param comp_dict: (dictionary) contains the parameters for each component
+    :param noise: (float) noise as a proportion of std in the noise free signal
+    :return:
+    """
+    erp = generate_erp(times, comp_dict, peak_noise=0, latency_noise=0, sigma_noise=0)
+    noise_mv = np.std(erp) * noise
+    return noise_mv
+
+
 def generate_erp(times, comp_dict, peak_noise=0.1, latency_noise=0, sigma_noise=0):
     """
 
@@ -32,12 +48,12 @@ def generate_erp(times, comp_dict, peak_noise=0.1, latency_noise=0, sigma_noise=
     return np.sum(np.array(comps_list), axis=0)
 
 
-def adjust_comp(components_dict, effect_size_dict, conditions):
+def adjust_comp(components_dict, effect_size_dict, conditions, noise=0.1):
     """
 
     :param components_dict:
     :param effect_size_dict:
-    :param sigma:
+    :param noise:
     :param conditions:
     :return:
     """
@@ -50,7 +66,7 @@ def adjust_comp(components_dict, effect_size_dict, conditions):
     for component in components_dict.keys():
         effect_size = effect_size_dict[component]
         # Compute the amplitude difference to obtain such an effect size under this noise:
-        amp_diff = (effect_size * components_dict[component]["amplitude_std"]) / 2
+        amp_diff = (effect_size * noise) / 2
         # Adding that difference to the amplitude of the first condition:
         cond_comp_dict[conditions[0]][component] = {
             "amplitude": components_dict[component]["amplitude"] + amp_diff,
