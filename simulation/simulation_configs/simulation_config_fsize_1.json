@@ -24,11 +24,11 @@
     "N2": 0,
     "P3": 0
   },
-  "peak_noise": true,
-  "within_subject_noise": 0.01,
+  "peak_noise": false,
+  "within_subject_noise": 0.0,
   "recording_noise": {
     "mean": 0,
-    "sigma": 0.01,
-    "autocorrelation_ms": 2
+    "sigma": 1,
+    "autocorrelation_ms": 0
   }
 }
