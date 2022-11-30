@@ -63,8 +63,8 @@ def simulate_epochs(channels):
                                                  peak_noise=param["within_subject_noise"])
                                     for _ in range(param["n_trials_per_cond"])])
                     # Generate the noise array:
-                    noise = np.random.normal(noise_mv,
-                                             scale=param["recording_noise"]["sigma"],
+                    noise = np.random.normal(param["recording_noise"]["mean"],
+                                             scale=noise_mv,
                                              size=erp.shape)
                     if param["recording_noise"]["autocorrelation_ms"] != 0:
                         filt_kern = scipy.signal.boxcar(int(param["recording_noise"]["autocorrelation_ms"] * 1000 /
