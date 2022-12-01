@@ -122,7 +122,7 @@ def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", m
                                            precision=precision)
 
     # Convert ms to samples:
-    trials_jitter_samp = np.array([jitter * (epochs.info["sfreq"] / 1000) for jitter in trials_jitter_ms])
+    trials_jitter_samp = np.array([np.ceil(jitter * (epochs.info["sfreq"] / 1000)) for jitter in trials_jitter_ms])
 
     # Get the epochs data:
     data = epochs.get_data()
