@@ -28,7 +28,7 @@
   "within_subject_noise": 0.0,
   "recording_noise": {
     "mean": 0,
-    "sigma": 1,
+    "sigma": 0.5,
     "autocorrelation_ms": 0
   }
 }

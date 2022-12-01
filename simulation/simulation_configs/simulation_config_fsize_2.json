@@ -29,7 +29,7 @@
   "brain_noise": 1,
   "recording_noise": {
     "mean": 0,
-    "sigma": 2,
+    "sigma": 0.5,
     "autocorrelation_ms": 0
   }
 }
