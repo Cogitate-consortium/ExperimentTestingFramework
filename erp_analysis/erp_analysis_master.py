@@ -17,6 +17,7 @@ import numpy as np
 test_subs = ["1", "2"]
 show_plots = False
 debug = False
+cmap = ""
 
 
 def subject_erp_wrapper(subject, path_info, jitter_durations, jitter_trial_props, jitter_tails, components_dict,
@@ -66,7 +67,7 @@ def subject_erp_wrapper(subject, path_info, jitter_durations, jitter_trial_props
                                                                 components_dict[component][
                                                                     "tmax"]).get_data()), axis=(1, 0))
                     # Compute the zscore difference between two conditions:
-                    evk_diff_zscore = diff_zscore(epochs)
+                    evk_diff_zscore = diff_zscore(epochs_jitter)
                     # Compute the evoked response for each condition:
                     evk = epochs_jitter.average(by_event_type=True)
                     # Append to the results:
@@ -111,7 +112,7 @@ def subject_erp_wrapper(subject, path_info, jitter_durations, jitter_trial_props
                                                              components_dict[component][
                                                                  "tmax"]).get_data()), axis=(1, 0))
                 # Compute the zscore difference between two conditions:
-                evk_diff_zscore = diff_zscore(epochs)
+                evk_diff_zscore = diff_zscore(epochs_shuffle)
                 evk = epochs_shuffle.average(by_event_type=True)
                 # Append to the results:
                 results = results.append(pd.DataFrame({
@@ -137,8 +138,8 @@ def subject_erp_wrapper(subject, path_info, jitter_durations, jitter_trial_props
 def compute_t_stat(data_1, data_2, axis=0):
     """
     This function computes a zscore along a specific dimension of a matrix
-    :param x: (float) a single number for which to compute the zscore with respect ot the y distribution to the
-    :param h0: (1d array) distribution of data with which to compute the std and mean:
+    :param data_2:
+    :param data_1:
     :param axis: (int) which axis along which to compute the zscore for the null distribution
     :return: zscore
     """
@@ -257,8 +258,14 @@ def erp_analysis():
         fig_save_root = path_generator(save_root, analysis=param["name"],
                                        preprocessing_steps=param["preprocess_steps"],
                                        fig=False, results=True, data=False)
+        evk_save_root = Path(fig_save_root, "evoked")
+        if not os.path.isdir(evk_save_root):
+            os.makedirs(evk_save_root)
+
         # List the subjects:
         subjects_list = list_subjects(Path(param["bids_root"], "derivatives", "preprocessing"), prefix="sub-")
+        if debug:
+            subjects_list = test_subs
         path_info = {
             "bids_root": param["bids_root"],
             "data_type": param["data_type"],
@@ -283,31 +290,40 @@ def erp_analysis():
         results_to_save = results_to_save.loc[:, results_to_save.columns != "evoked_diff"]
         results_to_save.to_csv(Path(results_save_root, "components_results.csv"))
 
-        # ================================================================================================
-        # Plot the effect sizes:
+        # ============================================================================================
+        # Plot effect of jitter:
         # Compute the effect sizes of the difference between the two conditions:
         results["cond_diff"] = results["cond_1-mean"] - results["cond_2-mean"]
+
+        # Get the data for the jitter:
+        jitter_results = results.loc[results["shuffle_proportion"] == 0]
+        # Remove duplicates:
+        jitter_results = jitter_results.drop_duplicates(subset=["effect_size", "subject", "jitter_duration",
+                                                                "jitter_prop", "shuffle_proportion"])
         effect_sizes_df = pd.DataFrame()
         # Looping through each component again to plot the effect of jitter:
         for component in results["component"].unique():
             for effect_size in results["effect_size"].unique():
-                for jitter_prop in results["jitter_prop"].unique():
-                    for jitter_duration in results["jitter_duration"].unique():
+                for jitter_duration in results["jitter_duration"].unique():
+                    for jitter_prop in results["jitter_prop"].unique():
                         # Extract all the data:
-                        diff_avg = results.loc[(results["component"] == component)
-                                               & (results["effect_size"] == effect_size)
-                                               & (results["jitter_prop"] == jitter_prop)
-                                               & (results["jitter_duration"] == jitter_duration), "avgs_diff_fsize"]. \
+                        diff_avg = jitter_results.loc[(results["component"] == component)
+                                                      & (results["effect_size"] == effect_size)
+                                                      & (results["jitter_prop"] == jitter_prop)
+                                                      & (results[
+                                                             "jitter_duration"] == jitter_duration), "avgs_diff_fsize"]. \
                             to_numpy()
-                        diff_peak = results.loc[(results["component"] == component)
-                                                & (results["effect_size"] == effect_size)
-                                                & (results["jitter_prop"] == jitter_prop)
-                                                & (results["jitter_duration"] == jitter_duration), "peaks_diff_fsize"]. \
+                        diff_peak = jitter_results.loc[(results["component"] == component)
+                                                       & (results["effect_size"] == effect_size)
+                                                       & (results["jitter_prop"] == jitter_prop)
+                                                       & (results[
+                                                              "jitter_duration"] == jitter_duration), "peaks_diff_fsize"]. \
                             to_numpy()
-                        latencies_std = results.loc[(results["component"] == component)
-                                                    & (results["effect_size"] == effect_size)
-                                                    & (results["jitter_prop"] == jitter_prop)
-                                                    & (results["jitter_duration"] == jitter_duration), "latency_std"]. \
+                        latencies_std = jitter_results.loc[(results["component"] == component)
+                                                           & (results["effect_size"] == effect_size)
+                                                           & (results["jitter_prop"] == jitter_prop)
+                                                           & (results[
+                                                                  "jitter_duration"] == jitter_duration), "latency_std"]. \
                             to_numpy()
                         # Compute the effect size:
                         effect_sizes_df = effect_sizes_df.append(pd.DataFrame({
@@ -327,6 +343,7 @@ def erp_analysis():
             fig = plt.figure()
             ax = fig.add_subplot(projection='3d')
             for sim_effect_size in effect_sizes_df["sim_effect_size"].unique():
+                # Add the scatter:
                 ax.scatter(effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
                                                (effect_sizes_df[
                                                     "sim_effect_size"] == sim_effect_size),
@@ -341,6 +358,20 @@ def erp_analysis():
                                                "peak_fsize"].to_numpy(),
                            label="Simulated effect size = {}".format(sim_effect_size)
                            )
+                # Add Surface:
+                ax.plot_trisurf(effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
+                                                    (effect_sizes_df[
+                                                         "sim_effect_size"] == sim_effect_size),
+                                                    "jitter_prop"].to_numpy(),
+                                effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
+                                                    (effect_sizes_df[
+                                                         "sim_effect_size"] == sim_effect_size),
+                                                    "jitter_duration"].to_numpy(),
+                                effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
+                                                    (effect_sizes_df[
+                                                         "sim_effect_size"] == sim_effect_size),
+                                                    "peak_fsize"].to_numpy(),
+                                alpha=.2)
                 ax.set_xlabel('Jitter proportion')
                 ax.set_ylabel('Jitter duration')
                 ax.set_zlabel('Observed effect size')
@@ -371,6 +402,20 @@ def erp_analysis():
                                                "avg_fsize"].to_numpy(),
                            label="Simulated effect size = {}".format(sim_effect_size)
                            )
+                # Add Surface:
+                ax.plot_trisurf(effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
+                                                    (effect_sizes_df[
+                                                         "sim_effect_size"] == sim_effect_size),
+                                                    "jitter_prop"].to_numpy(),
+                                effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
+                                                    (effect_sizes_df[
+                                                         "sim_effect_size"] == sim_effect_size),
+                                                    "jitter_duration"].to_numpy(),
+                                effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
+                                                    (effect_sizes_df[
+                                                         "sim_effect_size"] == sim_effect_size),
+                                                    "avg_fsize"].to_numpy(),
+                                alpha=.2)
                 ax.set_xlabel('Jitter proportion')
                 ax.set_ylabel('Jitter duration')
                 ax.set_zlabel('Observed effect size')
@@ -401,6 +446,20 @@ def erp_analysis():
                                                "latencies_std"].to_numpy(),
                            label="Simulated effect size = {}".format(sim_effect_size)
                            )
+                # Add Surface:
+                ax.plot_trisurf(effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
+                                                    (effect_sizes_df[
+                                                         "sim_effect_size"] == sim_effect_size),
+                                                    "jitter_prop"].to_numpy(),
+                                effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
+                                                    (effect_sizes_df[
+                                                         "sim_effect_size"] == sim_effect_size),
+                                                    "jitter_duration"].to_numpy(),
+                                effect_sizes_df.loc[(effect_sizes_df["component"] == component) &
+                                                    (effect_sizes_df[
+                                                         "sim_effect_size"] == sim_effect_size),
+                                                    "latencies_std"].to_numpy(),
+                                alpha=.2)
                 ax.set_xlabel('Jitter proportion')
                 ax.set_ylabel('Jitter duration')
                 ax.set_zlabel('Observed {} peak latency std'.format(component))
@@ -413,22 +472,70 @@ def erp_analysis():
             else:
                 plt.close()
 
+            # Plot effect of jitter in 2D:
+            for effect_size in results["effect_size"].unique():
+                # Extract the data from this effect size:
+                data_df = effect_sizes_df.loc[effect_sizes_df["sim_effect_size"] == effect_size]
+                fig = plt.figure()
+                # Convert long to wide table to generate a heatmap:
+                avg_effect_size = data_df.loc[effect_sizes_df["component"] == component].pivot(
+                    index="jitter_prop",
+                    columns="jitter_duration",
+                    values="avg_fsize")
+                # Generate a heatmap:
+                fig, ax = plt.subplots(1)
+                sns.heatmap(avg_effect_size, ax=ax)
+                ax.set_ylabel("Jitter duration (ms)")
+                ax.set_xlabel("Jittered trials proportion")
+                ax.set_title("Average amplitude \u03F4 as a function of jitter"
+                             "\n comp={}, \u03F4={}".format(component, effect_size))
+                plt.savefig(Path(fig_save_root, "{}_jitter_average_fsize_{}.png".format(component, effect_size)))
+                if show_plots:
+                    plt.show()
+                else:
+                    plt.close()
+
+                # Same for the peak amplitude:
+                fig = plt.figure()
+                # Convert long to wide table to generate a heatmap:
+                avg_effect_size = data_df.loc[effect_sizes_df["component"] == component].pivot(
+                    index="jitter_prop",
+                    columns="jitter_duration",
+                    values="peak_fsize")
+                # Generate a heatmap:
+                fig, ax = plt.subplots(1)
+                sns.heatmap(avg_effect_size, ax=ax)
+                ax.set_ylabel("Jitter duration (ms)")
+                ax.set_xlabel("Jittered trials proportion")
+                ax.set_title("Peak amplitude \u03F4 as a function of jitter"
+                             "\n comp={}, \u03F4={}".format(component, effect_size))
+                plt.savefig(Path(fig_save_root, "{}_jitter_peak_fsize_{}.png".format(component, effect_size)))
+                if show_plots:
+                    plt.show()
+                else:
+                    plt.close()
+
         # ============================================================================================
         # Plot effect of shuffle:
+        # Get the data for the jitter:
+        shuffle_results = results.loc[(results["jitter_duration"] == 0) & (results["jitter_prop"] == 0)]
+        # Remove duplicates:
+        shuffle_results = shuffle_results.drop_duplicates(subset=["effect_size", "subject", "jitter_duration",
+                                                                  "jitter_prop", "shuffle_proportion"])
         for component in results["component"].unique():
             effect_sizes_df = pd.DataFrame()
             for effect_size in results["effect_size"].unique():
                 for shuffle_prop in results["shuffle_proportion"].unique():
                     # Extract all the data:
-                    diff_avg = results.loc[(results["component"] == component)
-                                           & (results["effect_size"] == effect_size)
-                                           & (results["shuffle_proportion"] == shuffle_prop),
-                                           "avgs_diff_fsize"]. \
+                    diff_avg = shuffle_results.loc[(results["component"] == component)
+                                                   & (results["effect_size"] == effect_size)
+                                                   & (results["shuffle_proportion"] == shuffle_prop),
+                                                   "avgs_diff_fsize"]. \
                         to_numpy()
-                    diff_peak = results.loc[(results["component"] == component)
-                                            & (results["effect_size"] == effect_size)
-                                            & (results["shuffle_proportion"] == shuffle_prop),
-                                            "peaks_diff_fsize"]. \
+                    diff_peak = shuffle_results.loc[(results["component"] == component)
+                                                    & (results["effect_size"] == effect_size)
+                                                    & (results["shuffle_proportion"] == shuffle_prop),
+                                                    "peaks_diff_fsize"]. \
                         to_numpy()
                     # Compute the effect size:
                     effect_sizes_df = effect_sizes_df.append(pd.DataFrame({
@@ -480,8 +587,8 @@ def erp_analysis():
             # Get all the data for this component:
             comp_results = results.loc[results["component"] == component]
             # Extract the data for plotting jitter without shuffle and the other way around:
-            jitter_data = comp_results.loc[comp_results["shuffle_proportion"] == 0]
-            shuffle_data = comp_results.loc[comp_results["jitter_prop"] == 0]
+            jitter_data = jitter_results.loc[jitter_results["component"] == component]
+            shuffle_data = shuffle_results.loc[shuffle_results["component"] == component]
 
             for sim_effect_size in jitter_data["effect_size"].unique():
                 # Extract these data:
@@ -586,7 +693,7 @@ def erp_analysis():
                         ax.set_ylabel("Amplitude (mV)")
                         ax.set_xlabel("Time (sec)")
                         plt.legend()
-                        plt.savefig(Path(fig_save_root, "{}_evoked_fsize_{}_jitter_dur_{}_jitter_prop_{}.png".format(
+                        plt.savefig(Path(evk_save_root, "{}_evoked_fsize_{}_jitter_dur_{}_jitter_prop_{}.png".format(
                             component,
                             sim_effect_size,
                             jitter_duration,
