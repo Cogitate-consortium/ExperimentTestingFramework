@@ -18,7 +18,7 @@
   "channels": ["E77"],
   "effect_size": {
     "baseline": 0,
-    "P1": 1.0,
+    "P1": 0.5,
     "N1": 0,
     "P2": 0,
     "N2": 0,

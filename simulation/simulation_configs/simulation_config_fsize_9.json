@@ -3,7 +3,7 @@
   "n_subjects": 40,
   "ses": "1",
   "data_type": "eeg",
-  "task": "sim_3",
+  "task": "sim_9",
   "preprocess_folder": "epoching",
   "preprocess_steps": "unknown",
   "signal": "erp",
@@ -18,7 +18,7 @@
   "channels": ["E77"],
   "effect_size": {
     "baseline": 0,
-    "P1": 0.3,
+    "P1": 0.9,
     "N1": 0,
     "P2": 0,
     "N2": 0,
