@@ -1,6 +1,6 @@
 {
   "bids_root": "C:\\Users\\alexander.lepauvre\\Documents\\PhD\\Experimental_testing_framework\\data\\simulation\\bids",
-  "n_subjects": 40,
+  "n_subjects": 1,
   "ses": "1",
   "data_type": "eeg",
   "task": "sim_10",
