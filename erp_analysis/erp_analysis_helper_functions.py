@@ -41,14 +41,17 @@ class MidpointNormalize(Normalize):
 
 def plot_heatmap(df, index, column, values, xlabel="", ylabel="", zlabel="", title="", cmap="RdYlBu_r", midpoint=1.96):
     """
-
-    :param df:
-    :param index:
-    :param column:
-    :param values:
-    :param xlabel:
-    :param ylabel:
-    :param title:
+    This function plots a heatmap from a dataframe.
+    :param df: (pandas dataframe) contains the values for which to compute the heatmap
+    :param index: (string) name of the column to use as index (i.e. rows of the heatmap)
+    :param column: (string) name of the column to use as column in the heatmap
+    :param values: (string) name of the column to use as values
+    :param xlabel: (string) label of the heatmap x axis
+    :param ylabel: (string) label of the heatmap y axis
+    :param zlabel: (string) label of the color bar
+    :param cmap: (string) name of the color map, see matplotlib
+    :param title: (string) title of the figure
+    :param midpoint: (float) midpoint of the color bar
     :return:
     """
     # Convert long to wide table to generate a heatmap:
@@ -67,33 +70,22 @@ def plot_heatmap(df, index, column, values, xlabel="", ylabel="", zlabel="", tit
     return fig
 
 
-def plot_3d(ax, x, y, z, c="k", xlabel="", y_label="", zlabel="", alpha=.2, cmap="RdYlBu_r"):
-    """
-
-    :param ax:
-    :param x:
-    :param y:
-    :param z:
-    :param label:
-    :param xlabel:
-    :param y_label:
-    :param zlabel:
-    :param alpha:
-    :return:
-    """
-    # Add the scatter:
-    p = ax.scatter(x, y, z, c=[c] * len(x), cmap=cmap)
-    # Add Surface:
-    color = cm.get_cmap(cmap)(c)
-    ax.plot_trisurf(x, y, z, alpha=alpha, color=color)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(y_label)
-    ax.set_zlabel(zlabel)
-    return ax, p
-
-
 def subject_erp_wrapper(subject, path_info, jitter_durations, jitter_trial_props, jitter_tails, components_dict,
                         conditions, shuffle_props, iteration):
+    """
+    This function is a wrapper of the different functions used to performed the iteration of shuffling. This enables
+    to call this function in parallel
+    :param subject: (string) name of the subject
+    :param path_info: (dict) contains the various bits and pieces of the path
+    :param jitter_durations: (int) duration of jitter in ms
+    :param jitter_trial_props: (float) proportion of trials affected by the jitter
+    :param jitter_tails: (string) whether the jitter is upper tail, lower tail or btoh
+    :param components_dict: (dict) contains the parameters of the components effect sizes
+    :param conditions: (list of strings) names of the conditions
+    :param shuffle_props: (float) proportion of trials with shuffle labels
+    :param iteration: (int) iteration number
+    :return:
+    """
     results = pd.DataFrame()
     for task in path_info["tasks"]:
         # Load the epochs:
@@ -265,6 +257,13 @@ def compute_fsize(data_1, data_2):
 
 
 def single_trials_fsizes(epochs, tmin, tmax):
+    """
+    This function compute effect sizes at the single trial level
+    :param epochs: (mne epochs object)
+    :param tmin: (float) tmin for which to compute the effect size
+    :param tmax: (float) tmax for which to compute the effect size
+    :return:
+    """
     # Get the conditions:
     conds = list(set(epochs.events[:, 2]))
     if len(conds) > 2:
