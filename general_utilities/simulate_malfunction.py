@@ -179,28 +179,26 @@ def shuffle_triggers(epochs, trials_proportion=0.05):
     :param trials_proportion:
     :return:
     """
-    # Get the indices of all trials:
-    all_trials_inds = np.arange(0, epochs.events.shape[0])
-    # Randmoly subsample a set of trials to shuffle:
-    subsample_inds = np.sort(np.random.randint(0, high=epochs.events.shape[0],
-                                               size=int(trials_proportion * epochs.events.shape[0])))
-    # Randomly shuffle the subset:
-    shuffled_subsample = np.random.permutation(subsample_inds)
-    new_ind = []
-    # Loop through each trial:
-    for ind in all_trials_inds:
-        # If the current index is one that was shuffled:
-        if ind in subsample_inds:
-            # Find the trial index within the subsample:
-            subsample_ind = np.where(subsample_inds == ind)
-            new_ind.append(shuffled_subsample[subsample_ind][0])
-        else:
-            new_ind.append(ind)
-
-    # Now, reorganize the events and meta data accordingly:
-    new_events = epochs.events[new_ind, 2]
-    epochs.events[:, 2] = new_events
-    new_metadata = epochs.metadata.iloc[new_ind].reset_index(drop=True)
-    epochs.metadata = new_metadata
+    # Get the conditions names:
+    conditions = list(epochs.metadata["condition"].unique())
+    assert len(conditions) == 2, "the epochs contain more than two conditions! Not supported!"
+    # Get the indices of each condition:
+    cond_inds = []
+    for condition in conditions:
+        cond_inds.append(np.array(epochs.metadata.loc[epochs.metadata["condition"] == condition].index))
+    # Make sure that both have the same length
+    assert len(cond_inds[0]) == len(cond_inds[1]), "The trial counts were unbalanced between both conditions!"
+    # Convert the indices to a matrix:
+    cond_inds = np.array(cond_inds).T
+    # Randomly selecting the indices to swap:
+    swap_inds = np.random.choice(range(cond_inds.shape[0]), int(trials_proportion * epochs.events.shape[0]))
+    # Looping through each of these indices:
+    for i in swap_inds:
+        cond_inds[i, :] = cond_inds[i, [1, 0]]
+    # Now flatten the matrix:
+    inds = cond_inds.T.flatten().T
+    # Reordering the metadata and events:
+    epochs.metadata = epochs.metadata.iloc[inds].reset_index(drop=True)
+    epochs.events = epochs.events[inds, :]
 
     return epochs

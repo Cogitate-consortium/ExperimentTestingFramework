@@ -4,12 +4,26 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
+from matplotlib import cm
 import seaborn as sns
 from general_utilities.path_helper_function import load_epochs
 from general_utilities.simulate_malfunction import jitter_trials, shuffle_triggers
 import numpy as np
-params = {'mathtext.default': 'regular' }
+params = {'mathtext.default': 'regular'}
 plt.rcParams.update(params)
+fig_size = [20, 15]
+SMALL_SIZE = 22
+MEDIUM_SIZE = 24
+BIGGER_SIZE = 26
+gaussian_sig = 4
+cmap = 'RdYlBu_r'
+plt.rc('font', size=SMALL_SIZE)  # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)  # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)  # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the fi
 
 
 class MidpointNormalize(Normalize):
@@ -43,9 +57,9 @@ def plot_heatmap(df, index, column, values, xlabel="", ylabel="", zlabel="", tit
     norm = MidpointNormalize(vmin=np.min(avg_effect_size.to_numpy()), vmax=np.max(avg_effect_size.max()),
                              midpoint=midpoint)
     # Generate a heatmap:
-    fig, ax = plt.subplots(1)
+    fig, ax = plt.subplots(1, figsize=fig_size)
     sns.heatmap(avg_effect_size, ax=ax, cmap=cmap, norm=norm,
-                cbar_kws={'label': 'colorbar title'})
+                cbar_kws={'label': zlabel})
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
@@ -53,7 +67,7 @@ def plot_heatmap(df, index, column, values, xlabel="", ylabel="", zlabel="", tit
     return fig
 
 
-def plot_3d(ax, x, y, z, label, xlabel="", y_label="", zlabel="", alpha=.2):
+def plot_3d(ax, x, y, z, c="k", xlabel="", y_label="", zlabel="", alpha=.2, cmap="RdYlBu_r"):
     """
 
     :param ax:
@@ -68,17 +82,18 @@ def plot_3d(ax, x, y, z, label, xlabel="", y_label="", zlabel="", alpha=.2):
     :return:
     """
     # Add the scatter:
-    ax.scatter(x, y, z, label=label)
+    p = ax.scatter(x, y, z, c=[c] * len(x), cmap=cmap)
     # Add Surface:
-    ax.plot_trisurf(x, y, z, alpha=alpha)
+    color = cm.get_cmap(cmap)(c)
+    ax.plot_trisurf(x, y, z, alpha=alpha, color=color)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(y_label)
     ax.set_zlabel(zlabel)
-    return ax
+    return ax, p
 
 
 def subject_erp_wrapper(subject, path_info, jitter_durations, jitter_trial_props, jitter_tails, components_dict,
-                        conditions, shuffle_props):
+                        conditions, shuffle_props, iteration):
     results = pd.DataFrame()
     for task in path_info["tasks"]:
         # Load the epochs:
@@ -132,6 +147,7 @@ def subject_erp_wrapper(subject, path_info, jitter_durations, jitter_trial_props
                         "task": task,
                         "effect_size": sim_param["effect_size"][component],
                         "subject": subject,
+                        "iteration": iteration,
                         "jitter_duration": jitter_duration,
                         "jitter_prop": jitter_proportion,
                         "shuffle_proportion": 0,
@@ -178,6 +194,7 @@ def subject_erp_wrapper(subject, path_info, jitter_durations, jitter_trial_props
                     "task": task,
                     "effect_size": sim_param["effect_size"][component],
                     "subject": subject,
+                    "iteration": iteration,
                     "jitter_duration": 0,
                     "jitter_prop": 0,
                     "shuffle_proportion": shuffle_proportion,
