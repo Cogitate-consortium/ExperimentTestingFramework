@@ -100,23 +100,6 @@ def gmm_from_data(components_priors, channels=None,
                                            np.squeeze(evk.copy().pick(channel).data.T),
                                            p0=amplitudes + latencies + sigmas,
                                            bounds=bounds, method="trf")
-            # Plot the single subjects fits to make sure that they make sense:
-            fig, ax = plt.subplots(2, figsize=[12, 8])
-            ax[0].plot(epochs.times, np.squeeze(evk.copy().pick(channel).data.T), label="data")
-            ax[0].plot(epochs.times, gaussian_5_comp(epochs.times, *sub_popt), label="fit")
-            ax[0].set_title("Observed and fitted ERP")
-            ax[0].legend()
-            # Plot separately each gaussian:
-            for i, component in enumerate(components_posteriors[channel].keys()):
-                ax[1].plot(epochs.times, gaussian(epochs.times, sub_popt[i],
-                                                  sub_popt[i + len(components_posteriors[channel])],
-                                                  sub_popt[i + len(components_posteriors[channel]) * 2]),
-                           label=component)
-            ax[1].legend()
-            ax[1].set_title("Fitted components for sub-{}".format(ind))
-            plt.legend()
-            plt.tight_layout()
-            plt.savefig("Fitted_components_sub-{}.png".format(ind))
             sub_fits.append(sub_popt)
         # Compute the standard deviation of each parameter:
         sub_param_std = list(np.std(np.array(sub_fits), axis=0))
