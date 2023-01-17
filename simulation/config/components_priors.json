@@ -1,0 +1,12 @@
+{
+  "P1": {
+    "amplitude": 0.1,
+    "amplitude_limits": [0, 0.2],
+    "latency": 0.1,
+    "latency_limits": [0, 0.2],
+    "sigma": 0.1,
+    "sigma_limits": [0, 0.2],
+    "offset": 0,
+    "offset_limits": [-0.1, 0.1]
+  }
+}
