@@ -1,45 +1,49 @@
 import json
+import os
 from pathlib import Path
-from general_utilities.path_helper_function import path_generator
 from simulation.plotter_functions import plot_jitters_sims, plot_shuffle_sims
 
 
-def plot_shortcut(config):
-    with open(config) as f:
-        param = json.load(f)
+def plot_results2d(config_erp, config_rt):
+
+    # ========================================================================================
+    # Load config:
+    # Load the ERP config:
+    with open(config_erp) as f:
+        param_erp = json.load(f)
+    # Load the RT config:
+    with open(config_rt) as f:
+        param_rt = json.load(f)
 
     # ========================================================================================
     # Plot RT results:
-    save_root = Path(param["simulation_bids"]["bids_root"], "derivatives", "reaction_time", "population")
-    results_save_root = path_generator(save_root,
-                                       preprocessing_steps=param["simulation_bids"]["preprocess_steps"],
-                                       fig=False, results=True, data=False)
+    results_save_root = Path(param_rt["bids_root"], "derivatives", param_rt["signal"])
+    if not os.path.isdir(results_save_root):
+        raise FileNotFoundError("The reaction time simulation files were not found. Make sure to run "
+                                "02_simulation_rt.py first!")
+
     # Save the results of the jitter and shuffle procedures:
     jitter_results_file = Path(results_save_root, "jitter_results.csv")
     shuffle_results_file = Path(results_save_root, "shuffle_results.csv")
     # Plot the results of the jitter:
-    plot_jitters_sims(jitter_results_file, param["simulation_bids"]["bids_root"], "reaction_time",
-                      param["simulation_bids"]["preprocess_steps"])
+    plot_jitters_sims(jitter_results_file, param_rt["bids_root"], param_rt["signal"])
     # Plot the results of the jitter:
-    plot_shuffle_sims(shuffle_results_file, param["simulation_bids"]["bids_root"], "reaction_time",
-                      param["simulation_bids"]["preprocess_steps"])
+    plot_shuffle_sims(shuffle_results_file, param_rt["bids_root"], param_rt["signal"])
 
     # ========================================================================================
     # Plot ERP results:
-    save_root = Path(param["simulation_bids"]["bids_root"], "derivatives", "erp", "population")
-    results_save_root = path_generator(save_root,
-                                       preprocessing_steps=param["simulation_bids"]["preprocess_steps"],
-                                       fig=False, results=True, data=False)
+    results_save_root = Path(param_erp["bids_root"], "derivatives", "erp", "population")
+    if not os.path.isdir(results_save_root):
+        raise FileNotFoundError("The ERP simulation files were not found. Make sure to run "
+                                "01_simulation_erp.py first!")
     # Save the results of the jitter and shuffle procedures:
     jitter_results_file = Path(results_save_root, "jitter_results.csv")
     shuffle_results_file = Path(results_save_root, "shuffle_results.csv")
     # Plot the results of the jitter:
-    plot_jitters_sims(jitter_results_file, param["simulation_bids"]["bids_root"], "erp",
-                      param["simulation_bids"]["preprocess_steps"])
+    plot_jitters_sims(jitter_results_file, param_erp["bids_root"], param_erp["signal"])
     # Plot the results of the jitter:
-    plot_shuffle_sims(shuffle_results_file, param["simulation_bids"]["bids_root"], "erp",
-                      param["simulation_bids"]["preprocess_steps"])
+    plot_shuffle_sims(shuffle_results_file, param_erp["bids_root"], param_erp["signal"])
 
 
 if __name__ == "__main__":
-    plot_shortcut("config\general_config.json")
+    plot_results2d("01_simulation_erp_config.json", "02_simulation_rt_config.json")

@@ -167,7 +167,6 @@ def erp_simulations(config, verbose=False):
 if __name__ == "__main__":
     # Path to the config:
     config_file = "general_config.json"
-    components_parameters_file = "components_priors.json"
     # Launch ERP simulation pipeline:
     run_param, jitter_results_path, shuffle_results_path, run_posteriors = \
         erp_simulations("01_simulation_erp_config.json", verbose=False)
