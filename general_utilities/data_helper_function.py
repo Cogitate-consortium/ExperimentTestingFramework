@@ -87,7 +87,7 @@ def compute_epochs_stat(epochs, tmin, tmax, metric="mean", channel="E77", cond_1
     :return:
     """
     if metric.lower() == "mean":
-        metric_fun = np.mean
+        metric_fun = "mean"
     elif metric.lower() == "peak":
         metric_fun = np.max
     else:
@@ -96,7 +96,7 @@ def compute_epochs_stat(epochs, tmin, tmax, metric="mean", channel="E77", cond_1
     df_epochs = epochs.copy().pick(channel).crop(tmin=tmin, tmax=tmax).to_data_frame(long_format=True)
     # Compute the dependent variable
     dependent_var_df = \
-        df_epochs.groupby(['channel', 'epoch'], group_keys=False)[
+        df_epochs.groupby(['channel', 'epoch'], group_keys=False, observed=False)[
             "value"].aggregate(metric_fun).reset_index()
     dependent_var_df["condition"] = epochs.metadata["condition"]
     # Compute the required statistic:
