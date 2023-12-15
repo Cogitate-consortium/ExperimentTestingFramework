@@ -4,6 +4,7 @@ import math
 from scipy.stats import norm
 
 mne.set_log_level(verbose="WARNING")
+np.random.seed(0)
 
 
 def approximate_sigma(x, proba, loc=0):
@@ -125,7 +126,7 @@ def jitter_trials(epochs, refresh_rate=16, trials_proportion=0.1, tail="both", m
     trials_jitter_samp = np.array([np.ceil(jitter * (epochs.info["sfreq"] / 1000)) for jitter in trials_jitter_ms])
 
     # Get the epochs data:
-    data = epochs.get_data()
+    data = epochs.get_data(copy=True)
 
     # Generate a new time axis to account for the most extreme jitters:
     min_jitter, max_jitter = np.min(trials_jitter_samp), np.max(trials_jitter_samp)

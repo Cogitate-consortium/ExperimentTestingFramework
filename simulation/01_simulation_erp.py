@@ -1,5 +1,6 @@
 import mne
 import json
+import os
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -7,6 +8,8 @@ from general_utilities.path_helper_function import list_subjects, load_epochs
 from general_utilities.simulate_malfunction import jitter_trials, shuffle_triggers
 from general_utilities.data_helper_function import compute_epochs_stat
 from simulation.erp_helper_function import generate_single_trials, erp_gaussian_model
+
+np.random.seed(0)
 
 
 def erp_simulations(config, verbose=False):
@@ -63,7 +66,8 @@ def erp_simulations(config, verbose=False):
 
     # Prepare path to save the results:
     results_save_root = Path(param["bids_root"], "derivatives", param["signal"])
-
+    if not os.path.isdir(results_save_root):
+        os.makedirs(results_save_root)
     # Unroll the malfunc parameters:
     jitter_proportions = np.arange(**param["jitter_trial_props"]).round(decimals=2)
     jitter_durations = np.arange(**param["jitter_durations"]).round(decimals=2)
@@ -154,8 +158,8 @@ def erp_simulations(config, verbose=False):
     # Save the results of the jitter and shuffle procedures:
     jitter_results_file = Path(results_save_root, "jitter_results.csv")
     shuffle_results_file = Path(results_save_root, "shuffle_results.csv")
-    shuffle_results.to_csv(Path(results_save_root, "shuffle_results.csv"))
-    jitters_results.to_csv(Path(results_save_root, "jitter_results.csv"))
+    shuffle_results.to_csv(shuffle_results_file)
+    jitters_results.to_csv(jitter_results_file)
 
     return param, jitter_results_file, shuffle_results_file, posteriors
 
