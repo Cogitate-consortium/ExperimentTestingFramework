@@ -8,6 +8,24 @@ from general_utilities.data_helper_function import create_epochs, compute_t_stat
 
 
 def generate_single_trials(times, fsize, components_dict, channel, n_trials, conditions, sigma, sfreq):
+    """
+    This function generates single erp data according to a set of parameters. The component dict contains
+    parameters for gaussians that get summed together to generate the single trials.
+    :param times: (np array) times vector for the single trial
+    :param fsize: (float) effect size (i.e. difference between two conditions)
+    :param components_dict: (dict) contains the parameters for the ERP components:
+        "component_name": name of the component
+            "amplitude": amplitude of the gaussian
+            "latency": latency parameter of the gaussian
+            "sigma": width of the gaussian
+            "offset": vertical offset, i.e. intercept
+    :param channel: (string) name of the channel
+    :param n_trials: (int) number of trials to simulate
+    :param conditions: (list) name of the conditions
+    :param sigma: (float) noise
+    :param sfreq: (int) sampling frequency of the simulated data
+    :return: epochs (mne epochs object) simulated epochs data
+    """
     # Preallocate array for data:
     data = np.zeros(
         [n_trials * len(conditions), 1, times.shape[0]])
@@ -35,24 +53,28 @@ def generate_single_trials(times, fsize, components_dict, channel, n_trials, con
     return epochs
 
 
-def erp_gaussian_model(grand_avg, priors, channel="E77", verbose=True, plot=True):
+def erp_gaussian_model(grand_avg, comp_bounds, channel="E77", verbose=True, plot=True):
     """
-
-    :param data:
-    :param priors:
+    This function takes in ERP data and fits a predifined number of components using scipy curve_fit. The components
+    further have contrains and bounds to ensure that the fitted components match current ERP knowledge.
+    :param grand_avg: (np array) grand average data of the original data set to simulate
+    :param comp_bounds: (dict) contains the bounds of each component and its respective parameters
+    :param channel: (string) name of the channel of interest.
+    :param verbose: (bool) print stuff in command window or not
+    :param plot: (bool) whether to plot the fit
     :return:
     """
     # Convert the priors to lists:
-    amplitudes = [priors[comp]["amplitude"] for comp in priors.keys()]
-    latencies = [priors[comp]["latency"] for comp in priors.keys()]
-    sigmas = [priors[comp]["sigma"] for comp in priors.keys()]
-    offsets = [priors[comp]["offset"] for comp in priors.keys()]
+    amplitudes = [comp_bounds[comp]["amplitude"] for comp in comp_bounds.keys()]
+    latencies = [comp_bounds[comp]["latency"] for comp in comp_bounds.keys()]
+    sigmas = [comp_bounds[comp]["sigma"] for comp in comp_bounds.keys()]
+    offsets = [comp_bounds[comp]["offset"] for comp in comp_bounds.keys()]
     # Convert the bounds to list:
     bounds = [[], []]
     for parameter in ["amplitude_limits", "latency_limits", "sigma_limits", "offset_limits"]:
-        for component in priors.keys():
-            bounds[0].append(priors[component][parameter][0])
-            bounds[1].append(priors[component][parameter][1])
+        for component in comp_bounds.keys():
+            bounds[0].append(comp_bounds[component][parameter][0])
+            bounds[1].append(comp_bounds[component][parameter][1])
     # Fit the model to each channel separately:
     posteriors = {
         component: {
@@ -61,7 +83,7 @@ def erp_gaussian_model(grand_avg, priors, channel="E77", verbose=True, plot=True
             "sigma": None,
             "offset": None
         }
-        for component in priors.keys()
+        for component in comp_bounds.keys()
     }
     # Computing the components at the population level:
     popt, pcov = curve_fit(gaussian, grand_avg.times,
@@ -119,13 +141,19 @@ def erp_gaussian_model(grand_avg, priors, channel="E77", verbose=True, plot=True
 
 def generate_erp(times, comp_dict, peak_noise=0.1, latency_noise=0, sigma_noise=0):
     """
-
-    :param times:
-    :param comp_dict:
-    :param peak_noise:
-    :param latency_noise:
-    :param sigma_noise:
-    :return:
+    This function generates ERP as a linear mixture of the diverse components. In other words, gaussian curves are
+    generated for each component. The ERP is the sum across these components.
+    :param times: (numpy array) times vector
+    :param comp_dict: (dict) contains the parameters for the ERP components:
+        "component_name": name of the component
+            "amplitude": amplitude of the gaussian
+            "latency": latency parameter of the gaussian
+            "sigma": width of the gaussian
+            "offset": vertical offset, i.e. intercept
+    :param peak_noise: (float) noise to add to the amplitude
+    :param latency_noise: (float) noise to add to the latency value
+    :param sigma_noise: (float) noise to add to the width and offset
+    :return: (np array) simulated ERP for this particular combination of components.
     """
     comps_list = []
     for comp in comp_dict:
@@ -156,12 +184,27 @@ def convert_noise(times, comp_dict, noise):
 
 def adjust_comp(components_dict, fsize, conditions, noise=0.1):
     """
-
-    :param components_dict:
-    :param fsize:
-    :param noise:
-    :param conditions:
-    :return:
+    This function adjusts the component parameters so that if we have an effect size of say 0.2, the difference
+    in amplitude between the two components will be adjusted to match that effect size (given the noise)
+    :param components_dict: (dict) contains the parameters for the ERP components:
+        "component_name": name of the component
+            "amplitude": amplitude of the gaussian
+            "latency": latency parameter of the gaussian
+            "sigma": width of the gaussian
+            "offset": vertical offset, i.e. intercept
+    :param fsize: (float) effect size of interest. The amplitude difference between the gaussian will be computed as:
+    amp_diff = fsize * noise
+    :param noise: (float) noise in the data
+    :param conditions: (list of strings) name of the conditions of interests.
+    :return: (cond_comp_dict) dict containing the parameters of each component in each condition:
+        "component_name": name of the component
+            "condition_name":
+                "amplitude": amplitude of the gaussian
+                "latency": latency parameter of the gaussian
+                "sigma": width of the gaussian
+                "offset": vertical offset, i.e. intercept
+            ...
+        ...
     """
     assert len(conditions) == 2, "You have passed more than two conditions, not supported yet!"
 
@@ -190,6 +233,15 @@ def adjust_comp(components_dict, fsize, conditions, noise=0.1):
 
 
 def gaussian(x, a, mu, sig, offset):
+    """
+    Gaussian function
+    :param x: (numpy array) x values. In the case of time series, the time vector
+    :param a: (float) amplitude of the gaussian
+    :param mu: (float) latency of the gaussian
+    :param sig: (float) width of the gaussian
+    :param offset: (float) vertical offset, i.e. intercept
+    :return: (numpy array) gaussian curve
+    """
     return (a * np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))) + offset
 
 
