@@ -118,4 +118,6 @@ def compute_fsize(data_1, data_2):
     :param data_2:
     :return:
     """
-    return (np.mean(np.array(data_1)) - np.mean(np.array(data_2))) / np.std(np.concatenate([data_1, data_2]))
+    # Compute the pulled standard deviation:
+    pooled_std = np.sqrt(((np.std(data_1) ** 2) + (np.std(data_2) ** 2)) / 2)
+    return (np.mean(np.array(data_1)) - np.mean(np.array(data_2))) / pooled_std
