@@ -56,7 +56,7 @@ def erp_simulations(config, verbose=False):
         print("Fitting the gaussian mixture model: ")
     # Run model fitting with optimization:
     posteriors = erp_gaussian_model(grand_avg, param["optimization_parameters"],
-                                    channel=param["channel"], verbose=True, plot=True)
+                                    channel=param["channel"], verbose=True, plot=False)
 
     # =======================================================================================================
     # Simulate single trials according to the passed configs:

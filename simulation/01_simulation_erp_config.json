@@ -65,5 +65,5 @@
     "stop": 0.5,
     "step": 0.05
   },
-  "n_repeats": 20
+  "n_repeats": 100
 }
