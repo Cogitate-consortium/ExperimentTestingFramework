@@ -11,7 +11,7 @@ from general_utilities.data_helper_function import find_nearest_ind, create_epoc
 
 from simulation.plotter_functions import plot_jitters_sims, plot_shuffle_sims
 
-show_results = False
+show_results = True
 np.random.seed(0)
 
 
@@ -49,12 +49,21 @@ def simulate_reaction_times(config):
         # Generate response time stamps from both conditions:
         for ind, condition in enumerate(param["conditions"]):
             data.append(np.zeros([param["n_trials_per_cond"], 1, times.shape[0]]))
-            print((param["mean_rt_ms"] + delay_diff * ind) * 10 ** -3)
+            # Set the mean RT for this particular condition
+            if ind == 0:  # For the first condition, take the default mean RT
+                mean_rt = param["mean_rt_ms"] * 10 ** -3
+            else:
+                # For the second condition, calculate the mean RT so that the diff to observe the expected
+                # effect size is in log space. In other words:
+                # delay_diff = ln(cond_2) - ln(cond_1)
+                # ln(cond_2) = delay_diff + ln(cond_1)
+                # cond_2 = exp(delay_diff + ln(cond_1))
+                mean_rt = np.exp(delay_diff * 10 ** -3 + np.log(param["mean_rt_ms"] * 10 ** -3))
+            print("Simulating data with mean_rt={:.3f}".format(mean_rt))
             # Generate single trials rt:
-            cond_rt = np.random.lognormal(mean=np.log((param["mean_rt_ms"] + delay_diff * ind) * 10 ** -3),
+            cond_rt = np.random.lognormal(mean=np.log(mean_rt),
                                           sigma=param["sigma_rt_ms"] * 10 ** -3,
-                                          size=param[
-                                              "n_trials_per_cond"])
+                                          size=param["n_trials_per_cond"])
             # Set a 1 at each rt inds:
             for trial in range(data[ind].shape[0]):
                 data[ind][trial, 0, find_nearest_ind(times, cond_rt[trial])] = 1
@@ -148,9 +157,3 @@ if __name__ == "__main__":
     # Simulate the reaction time with jitters and label shuffles:
     run_param, jitter_results_path, shuffle_results_path = \
         simulate_reaction_times("02_simulation_rt_config.json")
-    # Plot the results of the jitter:
-    plot_jitters_sims(jitter_results_path, run_param["simulation_bids"]["bids_root"], "reaction_time",
-                      run_param["simulation_bids"]["preprocess_steps"])
-    # Plot the results of the jitter:
-    plot_shuffle_sims(shuffle_results_path, run_param["simulation_bids"]["bids_root"], "reaction_time",
-                      run_param["simulation_bids"]["preprocess_steps"])
