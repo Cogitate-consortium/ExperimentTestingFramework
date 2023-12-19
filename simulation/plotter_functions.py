@@ -100,7 +100,7 @@ def plot_jitters_sims(results_file, bids_root, signal, threshold=1.96):
     plt.title("Observed jitter effect on effect size")
     plt.tight_layout()
     ax.view_init(elevation, azimuth)
-    plt.savefig(Path(fig_save_root, "Reaction_time_effect_sizes_3d.png"))
+    plt.savefig(Path(fig_save_root, "Effect_sizes_3d.png"))
     if show_results:
         plt.show()
     plt.close()
@@ -151,7 +151,7 @@ def plot_jitters_sims(results_file, bids_root, signal, threshold=1.96):
     plt.title("Observed jitter effect on T statistic")
     plt.tight_layout()
     ax.view_init(elevation, azimuth)
-    plt.savefig(Path(fig_save_root, "Reaction_time_tstat_3d.png"))
+    plt.savefig(Path(fig_save_root, "Tstat_3d.png"))
     if show_results:
         plt.show()
     plt.close()

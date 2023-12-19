@@ -32,7 +32,7 @@ def plot_results2d(config_erp, config_rt):
 
     # ========================================================================================
     # Plot ERP results:
-    results_save_root = Path(param_erp["bids_root"], "derivatives", "erp", "population")
+    results_save_root = Path(param_erp["bids_root"], "derivatives", "erp")
     if not os.path.isdir(results_save_root):
         raise FileNotFoundError("The ERP simulation files were not found. Make sure to run "
                                 "01_simulation_erp.py first!")
