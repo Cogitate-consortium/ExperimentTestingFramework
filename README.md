@@ -3,7 +3,10 @@ This repository contain all code used in the paper: "A standardized framework to
 
 ## Setup
 The environment should be installed by entering:
+```
 conda env create -f environment.yml
+```
+
 If you wish to run the simulation of ERP, make sure to download the EEG data set found here:
 https://purl.stanford.edu/bq914sc3730
 
