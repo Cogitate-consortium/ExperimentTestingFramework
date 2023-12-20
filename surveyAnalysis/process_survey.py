@@ -105,20 +105,6 @@ def plot_part_a(dataset, save_path, qs_dict):
     plt.clf()
     plt.close()
 
-    # COMBINATION
-    colors = {'Never (0%)': c[5], 'Some (<50%)': c[4], 'Most (>=50%)': c[1], 'All (100%)': c[0]}
-    # colors = ["#97AFB3", "#C39345", "#B66E3B", "#DAA79B"]  # all, most, never, some
-    # sns.set_palette(sns.color_palette(colors))
-    p = sns.histplot(data=dataset, x=qs_dict["Q1"], hue=qs_dict["Q2"], palette=colors, multiple="stack")
-    plt.xticks(fontsize=x_tick_size)
-    plt.yticks(fontsize=y_tick_size)
-    plt.xlabel("Number of different experiments carried out", fontsize=x_axis_size)
-    plt.ylabel("Count", fontsize=y_axis_size)
-    p.legend_.set_title("Experiments for which a test was run")
-    plt.title("The number of different experiments carried out by respondents", fontsize=title_size)
-    save_plot(save_path, "a12", w=12, h=8)
-    plt.clf()
-    plt.close()
     return
 
 
@@ -141,8 +127,6 @@ def plot_b1(dataset, save_path, qs_dict):
     tested_aspects["PcntTested"] = 100 * tested_aspects["Yes"] / (tested_aspects["Yes"] + tested_aspects["No"])
     tested_aspects.sort_values(by="PcntTested", inplace=True)
 
-    # colors = ["#616F76", "#C4C7B4", "#DDD7D1", "#C69376", "#9A5D48"]
-    # sns.set_palette(sns.color_palette(colors))
     colors = {'Experiment Duration': c[0], 'Event Timing': c[4], 'Event Content': c[1],
               'Peripherals Integration': c[2], 'Randomization Scheme': c[3]}
 
@@ -157,29 +141,7 @@ def plot_b1(dataset, save_path, qs_dict):
     plt.clf()
     plt.close()
 
-    # QUESTION 1 : BY NUMBER OF TESTED ASPECTS
-    mapbin = {"Yes": 1, "No": 0}
-    for col in b1_cols:
-        tested_dataset[col] = tested_dataset[col].map(mapbin)
-    tested_dataset['b1_count'] = tested_dataset[b1_cols].sum(axis=1)
-
-    aspect_counts = tested_dataset['b1_count'].value_counts().reset_index(drop=False, inplace=False)
-    aspect_counts['b1_count_pcnt'] = (aspect_counts['b1_count'] / aspect_counts['b1_count'].sum()) * 100
-
-    colors = {5: c[0], 4: c[1], 3: c[4], 2: c[8], 1: c[10], 0: c[11]}
-
-    p = sns.barplot(data=aspect_counts, x="index", y="b1_count_pcnt", palette=colors)
-    plt.xlabel("Number of Tested Aspects", fontsize=x_axis_size, labelpad=3)
-    plt.xticks(fontsize=x_tick_size)
-    plt.ylabel("% of Subjects", fontsize=y_axis_size)
-    plt.yticks(fontsize=y_tick_size)
-    plt.title("Number of Tested Aspects in Published Experiments", fontsize=title_size)
-    save_plot(save_path, "b1_counts", w=16, h=9)
-    plt.clf()
-    plt.close()
-
     tested_aspects.to_csv(os.path.join(save_path, "b1.csv"))
-    aspect_counts.to_csv(os.path.join(save_path, "b1_counts.csv"))
     return
 
 
@@ -187,7 +149,6 @@ def plot_b2(dataset, save_path, qs_dict):
     # QUESTION 2
     sns.set_style("white")
     c = [plt.cm.RdBu_r(i / 12) for i in range(12)]
-    # colors = ["#972B60", "#337C8E", "C74726"]  # both, manual, scripted
 
     tested_dataset = dataset[dataset[qs_dict["Q2"]] != NEVER].reset_index(drop=True, inplace=False)  # first, take ONLY people who tested their experiment
     # Testing Method (manual, scripted, both)
@@ -222,8 +183,6 @@ def plot_b3(dataset, save_path, qs_dict):
                          "I do a mixture of A and B": "Mixture of A&B"}, inplace=True)
     colors = {"B: Per Individual Experiment": c[8], "A: Unified Protocol": c[1], "Mixture of A&B": c[3], "Other": c[5]}
     label_colors = [colors[label] for label in protocol_cnt.keys()]
-    # colors = ["#337C8E", "#C69376", "#972B60", "#DDD7D1"]  # A, B, both, other
-    # sns.set_palette(sns.color_palette(colors))
     plt.pie(x=protocol_cnt, autopct="%.1f%%", explode=[0.05] * len(protocol_cnt.keys().tolist()),
             labels=protocol_cnt.keys(), colors=label_colors, pctdistance=0.5, textprops={'fontsize': x_tick_size})
     plt.title("Testing Protocol in Published Experiments", fontsize=title_size)
@@ -309,12 +268,12 @@ def plot_b6(dataset, save_path, qs_dict):
                 tested_dataset[qs_dict[f"Q18"]] != "Yes")), 'b6'] = "Did not test"
 
     aspect_counts = tested_dataset['b6'].value_counts().reset_index(drop=False, inplace=False)
-    aspect_counts['b6_count_pcnt'] = (aspect_counts['b6'] / aspect_counts['b6'].sum()) * 100
+    aspect_counts['b6_count_pcnt'] = (aspect_counts['count'] / aspect_counts['count'].sum()) * 100
 
     colors = {"Comparing on-screen\nwith logged events": c[0],
               "Comparing logged events\nwith experimental scheme": c[2], "Both": c[4], "Did not test": c[9]}
 
-    p = sns.barplot(data=aspect_counts, x="index", y="b6_count_pcnt", palette=colors,
+    p = sns.barplot(data=aspect_counts, x="b6", y="b6_count_pcnt", palette=colors,
                     order=["Did not test", "Both", "Comparing logged events\nwith experimental scheme",
                            "Comparing on-screen\nwith logged events"])
     plt.xlabel("On-Screen Content Test", fontsize=x_axis_size, labelpad=3)
@@ -366,29 +325,8 @@ def plot_b7(dataset, save_path, qs_dict):
     plt.clf()
     plt.close()
 
-    # QUESTION 1 : BY NUMBER OF TESTED ASPECTS
-    mapbin = {"Yes": 1, "No": 0}
-    for col in b7_cols:
-        tested_dataset[col] = tested_dataset[col].map(mapbin)
-    tested_dataset['b7_count'] = tested_dataset[b7_cols].sum(axis=1)
-
-    aspect_counts = tested_dataset['b7_count'].value_counts().reset_index(drop=False, inplace=False)
-    aspect_counts['b7_count_pcnt'] = (aspect_counts['b7_count'] / aspect_counts['b7_count'].sum()) * 100
-
-    colors = {2: c[3], 1: c[5], 0: c[9]}
-
-    p = sns.barplot(data=aspect_counts, x="index", y="b7_count_pcnt", palette=colors)
-    plt.xlabel("Number of Tested Methods Used", fontsize=x_axis_size, labelpad=3)
-    plt.xticks(fontsize=x_tick_size)
-    plt.ylabel("% of Subjects", fontsize=y_axis_size)
-    plt.yticks(fontsize=y_tick_size)
-    plt.title("Number of Testing Methods for Pseudo-Randomization", fontsize=title_size)
-    save_plot(save_path, "b7_counts", w=16, h=9)
-    plt.clf()
-    plt.close()
-
     tested_aspects.to_csv(os.path.join(save_path, "b7.csv"))
-    aspect_counts.to_csv(os.path.join(save_path, "b7_counts.csv"))
+
     return
 
 
@@ -414,24 +352,20 @@ def plot_b8(dataset, save_path, qs_dict):
     no_report.loc[:, "col_combination"] = no_report[[qs_dict["Q24"], "Reason"]].agg(':'.join, axis=1)
     no_report_cnt = no_report.groupby(["col_combination"])[RESP_ID].count()
 
-    general_colors = {"All": c[1], "No": c[10], "Some": c[5]}
+    general_colors = {"All": c[1], "No": c[10], "Some": c[3]}
     general_label_order = ["All", "Some", "No"]
     general_label_colors = [general_colors[label] for label in general_label_order]
 
-    colors = {"All:Didn't Know Where": c[6],
-              "Some:Didn't Know Where": c[6], "Some:Seems Irrelevant": c[7], "Some:Both": c[8],
-              "No:Didn't Know Where": c[6], "No:Seems Irrelevant": c[7], "No:Both": c[8]}
+    colors = {"All:Didn't Know Where": c[5],
+              "Some:Didn't Know Where": c[5], "Some:Seems Irrelevant": c[9], "Some:Both": c[7],
+              "No:Didn't Know Where": c[5], "No:Seems Irrelevant": c[9], "No:Both": c[7]}
 
-    specific_colors = {"Didn't Know Where": c[6], "Seems Irrelevant": c[7], "Both": c[8]}
     specific_label_order = ["All:Didn't Know Where",
                             "Some:Didn't Know Where", "Some:Seems Irrelevant", "Some:Both",
                             "No:Didn't Know Where", "No:Seems Irrelevant", "No:Both"]
     label_colors = [colors[label] for label in specific_label_order]
     no_report_cnt = no_report_cnt.reindex(specific_label_order)
 
-    # nested pie plot
-    # report_no, report_some = [["#DDD7D1", "#E6B89F", "#C69376", "#9A5D48"],
-    #                          ["#DDD7D1", "#A5B8BB", "#7DA1A7", "#2F7384"]]
     fig, ax = plt.subplots()
     ax.axis('equal')
 
@@ -701,5 +635,5 @@ def manage_processing(data_path, save_path):
 
 
 if __name__ == "__main__":
-    manage_processing(data_path=r"\results-survey.csv",
-                    save_path=r"")
+    manage_processing(data_path=r"..\results-survey.csv",
+                    save_path=r"..")
