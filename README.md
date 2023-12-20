@@ -57,7 +57,7 @@ The survey results can be found under: ExperimentTestingFramework\surveyAnalysis
 ```
 process_survey.py 
 ```
-performs preprocessing (such as removing incomplete responses) and outputs the processed dataset (processed_dataset.csv;) which contains the data of all the participants who completed the survey (N=100). 
+performs preprocessing (such as removing incomplete responses) and outputs the processed dataset (processed_dataset.csv) which contains the data of all the participants who completed the survey (N=100). 
 Then, based on this dataframe, it generates all the plots found in both the paper and supplementary, each accompanied by its specific dataframe (csv file). 
 
 ## References
