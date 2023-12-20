@@ -54,6 +54,9 @@ and bids_root/derivatives/rt) respectively.
 
 ## Survey results
 The survey results can be found under: ExperimentTestingFramework\surveyAnalysis\results-survey.csv. The script
-process_survey.py performs preprocessing (such as removing incomplete responses...) and generates all the plots
+```
+process_survey.py 
+```
+performs preprocessing (such as removing incomplete responses...) and generates all the plots
 found in the paper and supplementary.
 
