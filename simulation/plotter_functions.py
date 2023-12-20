@@ -101,6 +101,7 @@ def plot_jitters_sims(results_file, bids_root, signal, threshold=1.96):
     plt.tight_layout()
     ax.view_init(elevation, azimuth)
     plt.savefig(Path(fig_save_root, "Effect_sizes_3d.png"))
+    plt.savefig(Path(fig_save_root, "Effect_sizes_3d.svg"))
     if show_results:
         plt.show()
     plt.close()
@@ -152,6 +153,7 @@ def plot_jitters_sims(results_file, bids_root, signal, threshold=1.96):
     plt.tight_layout()
     ax.view_init(elevation, azimuth)
     plt.savefig(Path(fig_save_root, "Tstat_3d.png"))
+    plt.savefig(Path(fig_save_root, "Tstat_3d.svg"))
     if show_results:
         plt.show()
     plt.close()
@@ -163,17 +165,18 @@ def plot_jitters_sims(results_file, bids_root, signal, threshold=1.96):
                      "observed f size", xlabel="Jitter duration (ms)",
                      ylabel="Jittered trials proportion (%)", zlabel="$\u03F4_{obs}$",
                      title="Average amplitude \u03F4 as a function of jitter "
-                           "\u03F4={}".format(fsize), midpoint=0.2, frame_color=cmap(norm(fsize)))
+                           "\u03F4={}".format(fsize), midpoint=0.2)
         plt.savefig(Path(fig_save_root, "rt_jitter_average_fsize_{}.png".format(fsize)))
+        plt.savefig(Path(fig_save_root, "rt_jitter_average_fsize_{}.svg".format(fsize)))
         plt.close()
         # Plot the t statistic:
         plot_heatmap(jitter_summary.loc[jitter_summary["fsize"] == fsize], "jitter proportion", "jitter duration",
                      "t statistic", xlabel="Jitter duration (ms)",
                      ylabel="Jittered trials proportion (%)", zlabel="T stat",
                      title="T-stat as a function of jitter "
-                           "\u03F4={}".format(fsize), midpoint=threshold,
-                     frame_color=cmap(norm(fsize)))
+                           "\u03F4={}".format(fsize), midpoint=threshold)
         plt.savefig(Path(fig_save_root, "rt_jitter_tstat_{}.png".format(fsize)))
+        plt.savefig(Path(fig_save_root, "rt_jitter_tstat_{}.svg".format(fsize)))
         plt.close()
         # Plot the thresholded maps:
         plot_heatmap(jitter_summary.loc[jitter_summary["fsize"] == fsize], "jitter proportion", "jitter duration",
@@ -181,8 +184,9 @@ def plot_jitters_sims(results_file, bids_root, signal, threshold=1.96):
                      ylabel="Jittered trials proportion (%)", zlabel="T stat",
                      title="T-stat as a function of jitter "
                            "\u03F4={}".format(fsize), midpoint=threshold,
-                     frame_color=cmap(norm(fsize)), threshold=threshold)
+                     threshold=threshold)
         plt.savefig(Path(fig_save_root, "rt_jitter_tstat_{}_thresh.png".format(fsize)))
+        plt.savefig(Path(fig_save_root, "rt_jitter_tstat_{}_thresh.svg".format(fsize)))
         plt.close()
     return None
 
@@ -212,6 +216,7 @@ def plot_shuffle_sims(results_file, bids_root, signal, threshold=1.96):
                  title="Observed effect size as a function of label shuffles",
                  midpoint=0.2)
     plt.savefig(Path(fig_save_root, "rt_shuffle_fsize.png"))
+    plt.savefig(Path(fig_save_root, "rt_shuffle_fsize.svg"))
     plt.close()
     # Same for the t-statistic:
     plot_heatmap(shuffle_summary, "shuffle proportion",
@@ -220,6 +225,7 @@ def plot_shuffle_sims(results_file, bids_root, signal, threshold=1.96):
                  title="Observed effect size as a function of label shuffles",
                  midpoint=threshold)
     plt.savefig(Path(fig_save_root, "rt_shuffle_tstat.png"))
+    plt.savefig(Path(fig_save_root, "rt_shuffle_tstat.svg"))
     plt.close()
     # Same for the t-statistic:
     plot_heatmap(shuffle_summary, "shuffle proportion",
@@ -228,13 +234,14 @@ def plot_shuffle_sims(results_file, bids_root, signal, threshold=1.96):
                  title="Observed effect size as a function of label shuffles",
                  midpoint=threshold, threshold=threshold)
     plt.savefig(Path(fig_save_root, "rt_shuffle_tstat_thresh.png"))
+    plt.savefig(Path(fig_save_root, "rt_shuffle_tstat_thresh.svg"))
     plt.close()
 
     return None
 
 
 def plot_heatmap(df, index, column, values, xlabel="", ylabel="", zlabel="", title="", cmap="RdYlBu_r", midpoint=1.96,
-                 frame_color=None, threshold=None):
+                 threshold=None):
     """
 
     :param df:
@@ -247,7 +254,6 @@ def plot_heatmap(df, index, column, values, xlabel="", ylabel="", zlabel="", tit
     :param title:
     :param cmap:
     :param midpoint:
-    :param frame_color:
     :param threshold:
     :return:
     """
@@ -257,10 +263,7 @@ def plot_heatmap(df, index, column, values, xlabel="", ylabel="", zlabel="", tit
     norm = MidpointNormalize(vmin=np.min(avg_effect_size.to_numpy()), vmax=np.max(avg_effect_size.max()),
                              midpoint=midpoint)
     # Generate a heatmap:
-    if frame_color is not None:
-        fig, ax = plt.subplots(1, figsize=fig_size, edgecolor=frame_color, linewidth=frame_width)
-    else:
-        fig, ax = plt.subplots(1, figsize=fig_size)
+    fig, ax = plt.subplots(1, figsize=fig_size)
     if threshold is None:
         ax = sns.heatmap(avg_effect_size, ax=ax, cmap=cmap, norm=norm,
                          cbar_kws={'label': zlabel})
