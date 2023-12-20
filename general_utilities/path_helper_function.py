@@ -47,11 +47,10 @@ def list_subjects(root, prefix="sub-"):
     return subject_list
 
 
-def path_generator(root, analysis=None, preprocessing_steps=None, fig=False, results=False, data=False):
+def path_generator(root,  preprocessing_steps=None, fig=False, results=False, data=False):
     """
     Generate the path to where the data should be saved
     :param root: (string or pathlib path object) root of where the data should be saved
-    :param analysis: (string) name of the analysis. The highest level folder for the saving will be called accordingly
     :param preprocessing_steps: (string) description of the preprocessing steps used to generate the used data to keep
     track of things
     :param fig: (boolean) whether or not the path is for saving figures. If set to false, the stats should be set to
@@ -64,11 +63,11 @@ def path_generator(root, analysis=None, preprocessing_steps=None, fig=False, res
     """
 
     if fig is True and results is False and data is False:
-        save_path = Path(root, "figure", analysis, preprocessing_steps)
+        save_path = Path(root, "figure", preprocessing_steps)
     elif fig is False and results is True and data is False:
-        save_path = Path(root, "results", analysis, preprocessing_steps)
+        save_path = Path(root, "results", preprocessing_steps)
     elif fig is False and results is False and data is True:
-        save_path = Path(root, "data", analysis, preprocessing_steps)
+        save_path = Path(root, "data", preprocessing_steps)
     else:
         raise Exception("You attempted to generate a path to save the analysis specifying that it'S neither stats nor "
                         "figure. that doesn't work. Make sure that only one of the two is true")
@@ -86,4 +85,4 @@ def load_epochs(bids_root, subject, session, data_type, preprocessing_folder, si
                       preprocessing_folder, signal, preprocessing_steps,
                       "sub-{}_ses-{}_task-{}_desc-epoching_{}-epo.fif".format(subject, session, task, data_type))
     # Return the read epochs:
-    return mne.read_epochs(epoch_file)
+    return mne.read_epochs(epoch_file, verbose="ERROR")
