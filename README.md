@@ -8,7 +8,7 @@ conda env create -f environment.yml
 ```
 
 If you wish to run the simulation of ERP, make sure to download the EEG data set found here:
-https://purl.stanford.edu/bq914sc3730
+https://purl.stanford.edu/bq914sc3730 [[1]](#1)
 
 The scripts for the simulation are organized such that each analysis is accompanied by a config.json file.
 The variable "bids_root" should be adjusted in each of them with the path to where you wish to store the data. 
@@ -60,3 +60,8 @@ process_survey.py
 performs preprocessing (such as removing incomplete responses...) and generates all the plots
 found in the paper and supplementary.
 
+## References
+<a id="1">[1]</a> 
+Kaneshiro, B., Perreau Guimaraes, M., Kim, H. S., Norcia, A. M., & Suppes, P. (2015). 
+A representational similarity analysis of the dynamics of object processing using single-trial EEG classification. 
+Plos one, 10(8), e0135697.
