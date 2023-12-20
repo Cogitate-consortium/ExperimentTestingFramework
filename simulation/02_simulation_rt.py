@@ -11,7 +11,7 @@ from general_utilities.data_helper_function import find_nearest_ind, create_epoc
 
 from simulation.plotter_functions import plot_jitters_sims, plot_shuffle_sims
 
-show_results = True
+show_results = False
 np.random.seed(0)
 
 
