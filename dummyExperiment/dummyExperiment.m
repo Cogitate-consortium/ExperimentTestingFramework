@@ -144,7 +144,7 @@ for i = 1:totalTrials
             if KeyIsDown
                 % If a key was pressed
                 hasResp = 1;                     % Set response flag
-                rt      = onsetTime - respTime;  % Calculate reaction time
+                rt      = respTime - onsetTime;  % Calculate reaction time
            
                 if ismember('ESCAPE', KbName(keyCode))
                     % Abort the experiment if the escape key was pressed
