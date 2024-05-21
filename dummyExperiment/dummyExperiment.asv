@@ -15,10 +15,6 @@ white = WhiteIndex(screenNumber);
 black = BlackIndex(screenNumber);
 grey = white / 2;
 
-% Get the refresh rate:
-hz  = Screen('NominalFrameRate', window); % Screen refresh rate
-ifi = 1 / hz;                             % Inter frame interval
-
 % Open the screen
 Screen('Preference', 'SkipSyncTests', 1);
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber, grey);
@@ -28,6 +24,10 @@ Screen('Preference', 'SkipSyncTests', 1);
 
 % Get the center coordinates of the window
 [xCenter, yCenter] = RectCenter(windowRect);
+
+% Get the refresh rate:
+hz  = Screen('NominalFrameRate', window); % Screen refresh rate
+ifi = 1 / hz;                             % Inter frame interval
 
 % Text settings
 Screen('TextSize',  window, 40);
@@ -53,10 +53,11 @@ circleDiameter  = 300;    % Diameter of the circle
 
 % Photodiode parameters
 photodiodeDur = 0.032;    % Duration for which the photodiode should remain on
-photoSquareSize = 20;     % Size of the photodiode square
+photoSquareSize = 80;     % Size of the photodiode square
 
 % Text:
 welcomeText  = 'Welcome to the dummy experiment!';
+endText      = 'Congrats, you have completed the dummy experiment! The data were saved successfully';
 continueText = 'Press space to continue';
 
 %% Prepare the log file:
@@ -70,8 +71,8 @@ itis          = zeros(totalTrials, 1); % Log the inter trial intervals
 %% Trials loop:
 
 % Show an intruction screen:
-[~, ~, textBounds]     = DrawFormattedText(window, welcomeText, 'center', 'center', white);
-[~, ~, continueBounds] = DrawFormattedText(window, continueText, 'center', screenYpixels - 50, white);
+[~, ~, ~]     = DrawFormattedText(window, welcomeText, 'center', 'center', white);
+[~, ~, ~] = DrawFormattedText(window, continueText, 'center', screenYpixels - 50, white);
 Screen('Flip', window);
 % Wait for space key press
 KbName('UnifyKeyNames');
@@ -82,7 +83,7 @@ while 1
         break;
     end
 end
-waitSecs(rand + 0.5);  % Add a random jitter
+WaitSecs(rand + 0.5);  % Add a random jitter
 
 % Loop through each unique trial
 for i = 1:totalTrials
@@ -126,30 +127,45 @@ for i = 1:totalTrials
         
         % -----------------------------------------------------------------
         if photoFlag && elapsedTimePhoto > photodiodeDur
-            drawPhotodiode('black', window);
-            [~, offsetTime, ~, ~, ~] = Screen('Flip', window, [], 1);
-            photoFlag = 0;
-            elapsedTimePhoto = 0;
+            % If the photodiode is still on and has been on for more than
+            % it should, draw it off
+            drawPhotodiode('black', window);  % Set the photodiode square to black
+            [~, offsetTime, ~, ~, ~] = Screen('Flip', ... % Flip the screen
+                window, [], 1);
+            photoFlag                = 0;                 % Reset the photodiode flag
+            elapsedTimePhoto         = 0;                 % Reset the photodiode time counter
         end
-        % Update time counter:
+        
+        % -----------------------------------------------------------------
+        if ~hasResp
+            % If no response was registered in this trial, check if a key
+            % is pressed
+            [KeyIsDown, respTime, keyCode] = KbCheck();
+            if KeyIsDown
+                % If a key was pressed
+                hasResp = 1;                     % Set response flag
+                rt      = respTime - onsetTime;  % Calculate reaction time
+           
+                if ismember('ESCAPE', KbName(keyCode))
+                    % Abort the experiment if the escape key was pressed
+                    escapeKey = true;
+                    break;
+                elseif ismember('P', KbName(keyCode))
+                    % Abort the experiment if the escape key was pressed
+                    KbWait()
+                end
+            end
+        end
+
+        % -----------------------------------------------------------------
         elapsedTime = (GetSecs) - onsetTime;
         if photoFlag
             elapsedTimePhoto = GetSecs - photoOnset;
         end
-        % Check response:
-        if ~hasResp
-            [KeyIsDown, respTime, keyCode] = KbCheck();
-            if KeyIsDown
-                hasResp = 1;
-                rt      = onsetTime - respTime;
-                % Check if the Escape key was pressed to abort
-                if ismember('ESCAPE', KbName(keyCode))
-                    escapeKey = true;
-                    break;
-                end
-            end
-        end
+
     end
+
+    % Abort the experiment if the escape key was pressed
     if escapeKey
         break;
     end
@@ -160,7 +176,7 @@ for i = 1:totalTrials
     stimOnset(i)     = onsetTime;   % Onset of the stimulus in the previous trial
     stimOffset(i)    = offsetTime;  % Offset of the stimulus in the previous trial
     rts(i)           = rt;          % Reaction time in the previous trial
-    itis(i)        = iti;         % Duration of the inter-trial interval
+    itis(i)        = iti;           % Duration of the inter-trial interval
 
 end
 
@@ -172,9 +188,24 @@ logFile = array2table([(1:totalTrials)', stimDurations, ...
 % Add the stimShapes cell array as a table column
 logFile.shape = stimShapes;
 
-
 % Save to a csv:
-writetable(logFile, 'sub-101_ses-1_task-Dummy_events.csv')
+writetable(logFile, 'sub-102_ses-1_task-Dummy_events.csv')
+
+% Show an intruction screen:
+[~, ~, textBounds]     = DrawFormattedText(window, endText, 'center', 'center', white);
+[~, ~, continueBounds] = DrawFormattedText(window, continueText, 'center', screenYpixels - 50, white);
+Screen('Flip', window);
+% Wait for space key press
+KbName('UnifyKeyNames');
+spaceKey = KbName('space');
+while 1
+    [keyIsDown, ~, keyCode] = KbCheck;
+    if keyIsDown && keyCode(spaceKey)
+        break;
+    end
+end
 
 % Clear the screen
 sca;
+
+

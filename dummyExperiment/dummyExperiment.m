@@ -53,7 +53,7 @@ circleDiameter  = 300;    % Diameter of the circle
 
 % Photodiode parameters
 photodiodeDur = 0.032;    % Duration for which the photodiode should remain on
-photoSquareSize = 20;     % Size of the photodiode square
+photoSquareSize = 80;     % Size of the photodiode square
 
 % Text:
 welcomeText  = 'Welcome to the dummy experiment!';
@@ -150,6 +150,9 @@ for i = 1:totalTrials
                     % Abort the experiment if the escape key was pressed
                     escapeKey = true;
                     break;
+                elseif ismember('p', KbName(keyCode))
+                    % Abort the experiment if the escape key was pressed
+                    KbWait()
                 end
             end
         end
@@ -186,7 +189,7 @@ logFile = array2table([(1:totalTrials)', stimDurations, ...
 logFile.shape = stimShapes;
 
 % Save to a csv:
-writetable(logFile, 'sub-101_ses-1_task-Dummy_events.csv')
+writetable(logFile, 'sub-102_ses-1_task-Dummy_events.csv')
 
 % Show an intruction screen:
 [~, ~, textBounds]     = DrawFormattedText(window, endText, 'center', 'center', white);
