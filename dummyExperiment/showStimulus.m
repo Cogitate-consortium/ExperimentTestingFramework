@@ -1,5 +1,5 @@
 function [onsetTime] = showStimulus(trialType, window)
-global squareSize circleDiameter xCenter yCenter white
+global isTestMode squareSize circleDiameter xCenter yCenter white
 
 % Draw the shape
 switch trialType
@@ -14,8 +14,9 @@ switch trialType
 end
 
 % Draw the photodiode:
-drawPhotodiode('white', window)
-
+if isTestMode
+    drawPhotodiode('white', window)
+end
 % Flip to the screen
 [~, onsetTime, ~, ~, ~] = Screen('Flip', window,[],1);
 
