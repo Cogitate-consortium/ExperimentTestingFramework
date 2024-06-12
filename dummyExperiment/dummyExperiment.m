@@ -51,8 +51,6 @@ if isTestMode
     nchannels = 1; % Number of audio channels
     pahandle = PsychPortAudio('Open', [], 2, 0, freq, nchannels);
     PsychPortAudio('GetAudioData', pahandle, 10); % Preallocate buffer for 10 seconds (will auto-grow if needed)
-    % Start audio recording immediately
-    PsychPortAudio('Start', pahandle, 0, 0, 1);
 end
 
 %% Design parameters
@@ -108,10 +106,13 @@ while 1
     end
 end
 WaitSecs(rand + 0.5);  % Add a random jitter
-
+if isTestMode
+    % Start audio recording immediately
+    PsychPortAudio('Start', pahandle, 0, 0, 1);
+end
 % Loop through each unique trial
 for i = 1:totalTrials
-
+    
     % Determine current trial parameters
     [shapeIndex, durationIndex] = ind2sub([length(shapes), ... % Use indexing to get the trials parameters
         length(durations)], trials(i));
@@ -123,22 +124,22 @@ for i = 1:totalTrials
     elapsedTime      = 0; % Initiate time counter
     elapsedTimePhoto = 0; % Time counter for the photodiode
     rt               = 0;
-
+    
     % Show the current stimulus:
     [onsetTime] = showStimulus(shape, window);   % Show the stimulus
-
+    
     % Set the flags
     photoFlag   = 1;         % The photodiode is turned on when the stimulus appears
     photoOnset  = onsetTime; % At the same time as the stimulus
     stimFlag    = 1;         % mark that the stimulus is on
     hasResp     = 0;         % Check whether a key was pressed
-    escapeKey   = 0;
+    escapeKeyPressed   = 0;
     response    = 'None';
-    responseKey = [];
-
+    responseKey = nan;
+    
     %% Time loop:
     while elapsedTime < trialDuration + iti - (anticip_k * ifi)
-
+        
         % -----------------------------------------------------------------
         if stimFlag && elapsedTime > duration - (anticip_k * ifi)
             % If the stimulus is still present but the elapsed time since
@@ -152,7 +153,7 @@ for i = 1:totalTrials
             photoFlag                = 1;                      % Mark photodiode as on
             stimFlag                 = 0;                      % Mark that the stimulus was removed
         end
-
+        
         % -----------------------------------------------------------------
         if isTestMode && photoFlag && elapsedTimePhoto > photodiodeDur - (anticip_k * ifi)
             % If the photodiode is still on and has been on for more than
@@ -164,7 +165,7 @@ for i = 1:totalTrials
             photoFlag                = 0;                 % Reset the photodiode flag
             elapsedTimePhoto         = 0;                 % Reset the photodiode time counter
         end
-
+        
         % -----------------------------------------------------------------
         if ~hasResp
             % If no response was registered in this trial, check if a key
@@ -174,10 +175,10 @@ for i = 1:totalTrials
                 % If a key was pressed
                 hasResp = 1;                     % Set response flag
                 rt      = respTime - onsetTime;  % Calculate reaction time
-
+                
                 if keyCode(escapeKey)
                     % Abort the experiment if the escape key was pressed
-                    escapeKey = true;
+                    escapeKeyPressed = true;
                     break;
                 elseif keyCode(rightKey)
                     response = 'right';
@@ -185,7 +186,7 @@ for i = 1:totalTrials
                 elseif keyCode(leftKey)
                     response = 'left';
                     responseKey = find(keyCode);
-                elseif ismember('p', KbName(keyCode))
+                elseif strcmp('p', KbName(keyCode))
                     % Abort the experiment if the escape key was pressed
                     KbWait()
                 else
@@ -194,20 +195,20 @@ for i = 1:totalTrials
                 end
             end
         end
-
+        
         % -----------------------------------------------------------------
         elapsedTime = (GetSecs) - onsetTime;
         if photoFlag
             elapsedTimePhoto = GetSecs - photoOnset;
         end
-
+        
     end
-
+    
     % Abort the experiment if the escape key was pressed
-    if escapeKey
+    if escapeKeyPressed
         break;
     end
-
+    
     %% Log the past trial events
     stimShapes{i}    = shape;       % Shape of the previous trial
     stimDurations(i) = duration;    % Duration of the previous trial
@@ -217,31 +218,31 @@ for i = 1:totalTrials
     itis(i)          = iti;         % Duration of the inter-trial interval
     responses{i}     = response;    % Response the participants gave
     responseKeys(i)  = responseKey; % Response key the participants gave
-
+    
 end
 
 % Stop the audio recording
 if isTestMode
     PsychPortAudio('Stop', pahandle);
-
+     
     % Retrieve the recorded audio data
     audioData = PsychPortAudio('GetAudioData', pahandle);
-
+    
     % Close the audio device
     PsychPortAudio('Close', pahandle);
-
+    
     % Save the recorded audio data to a WAV file
     audiowrite(sprintf('sub-%s_ses-1_task-Dummy_audio.wav', subjectName), audioData', freq);
 end
 
 % Combine all trials info into a log file:
 logFile = array2table([(1:totalTrials)', stimDurations, ...
-    stimOnset, stimOffset, rts, itis, responses, responseKeys], ...
+    stimOnset, stimOffset, rts, itis, responseKeys], ...
     "VariableNames", {'trialNumber', 'duration','stimOnset', ...
-    'stimOffset', 'rt', 'iti', 'response', 'responseKey'});
+    'stimOffset', 'rt', 'iti', 'responseKey'});
 % Add the stimShapes cell array as a table column
 logFile.shape = stimShapes;
-
+logFile.response = responses;
 % Save to a csv:
 writetable(logFile, sprintf('sub-%s_ses-1_task-Dummy_events.csv', subjectName))
 
