@@ -71,17 +71,3 @@ def find_clicks(data, sr, thresh, distance_s=0.5):
     peaks_sec = [samp2sec(x, sr) for x in filtered_peaks]
 
     return filtered_peaks, peaks_sec
-
-
-from pathlib import Path
-data_root = r"C:\Users\alexander.lepauvre\Documents\GitHub\ExperimentTestingFramework\dummyExperiment\TestData"
-subID = "SX114"
-wav_fname = Path(data_root, "sub-{}_ses-1_task-Dummy_audio.wav".format(subID))
-sr, data = wavfile.read(wav_fname)
-plt.plot(data[:, 0])
-plt.show()
-peaks_samp, peaks_sec = find_clicks(data[:, 0], sr, 100, distance_s=0.5)
-plta
-plt.plot(peaks_samp, data[:, 0][peaks_samp], "x")
-plt.show()
-
