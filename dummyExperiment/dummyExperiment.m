@@ -21,7 +21,7 @@ black = BlackIndex(screenNumber);
 grey = white / 2;
 
 % Open the screen
-Screen('Preference', 'SkipSyncTests', 1);
+Screen('Preference', 'SkipSyncTests', 0   );
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber, grey);
 
 % Get the size of the screen
@@ -47,10 +47,10 @@ rightKey = KbName('RightArrow');
 % Record audio for test mode, to record the sound of key presses:
 if isTestMode
     InitializePsychSound(1);
-    freq = 44100; % Sample rate
     nchannels = 1; % Number of audio channels
-    pahandle = PsychPortAudio('Open', [], 2, 0, freq, nchannels);
-    PsychPortAudio('GetAudioData', pahandle, 10); % Preallocate buffer for 10 seconds (will auto-grow if needed)
+     freq = 44100;
+    pahandle = PsychPortAudio('Open', [], 2, 2, freq, 2, [], 0.02);
+    PsychPortAudio('GetAudioData', pahandle, 600 ); % Preallocate buffer for 10 seconds (will auto-grow if needed)
 end
 
 %% Design parameters
@@ -95,6 +95,7 @@ responseKeys  = zeros(totalTrials, 1); % Log the response keys that participants
 % Show an intruction screen:
 [~, ~, ~]     = DrawFormattedText(window, welcomeText, 'center', 'center', white);
 [~, ~, ~]     = DrawFormattedText(window, continueText, 'center', screenYpixels - 50, white);
+drawPhotodiode('black', window);  % Draw photodiode to mark the event
 Screen('Flip', window);
 % Wait for space key press
 KbName('UnifyKeyNames');
@@ -224,7 +225,7 @@ end
 % Stop the audio recording
 if isTestMode
     PsychPortAudio('Stop', pahandle);
-     
+    
     % Retrieve the recorded audio data
     audioData = PsychPortAudio('GetAudioData', pahandle);
     
