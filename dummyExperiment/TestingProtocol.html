@@ -7536,6 +7536,14 @@ a.anchor-link {
 <li>Check and report the experiment log files accuracy</li>
 <li>Check and report the experimental setup timing accuracy</li>
 </ul>
+<h2 id="Materials">Materials<a class="anchor-link" href="#Materials">¶</a></h2><p>In order to complete the framework, you will need the following devices (in paranthesis are the specific devices we used):</p>
+<ul>
+<li>Photodiode (<a href="https://brainvision.com/products/photo-sensor/">Brain vision photo-sensor</a>)</li>
+<li>Contact microphone (<a href="https://www.thomann.de/gb/schaller_oyster_723.htm">Schaller Oyster S/P</a>)</li>
+<li>Recording system for the photodiode (<a href="https://www.brainproducts.com/solutions/actichamp/">ActiChamp EEG amplifier</a>)</li>
+<li>Recording system for the microphone (<a href="https://rme-audio.de/de_fireface-ucx.html">RME Fireface UC/UCX</a>)</li>
+</ul>
+<p>In what is described below, the photodiode signal was recorded on a separate computer via the EEG amplifier, while the contact microphone signal was recorded on the experimental PC through the soundcard. Your lab's specific setup might differ, but the key requirement is that both signals are recorded to a file. Adjust the setup according to your lab's hardware.</p>
 <p>The numbering of each section in this notebook matches the sections in the <a href="https://www.protocols.io/edit/testing-framework-protocol-cm8wu9xe">protocol.io</a></p>
 </div>
 </div>
@@ -7545,7 +7553,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [42]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [37]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Authors: Alex Lepauvre &lt;alex.lepauvre@ae.mpg.de&gt;</span>
@@ -7576,9 +7584,9 @@ a.anchor-link {
 <div class="alert alert-info"><h4>Note</h4><p> 
     The steps below have to be prepared before running the experiment.
 </p></div>
-<h2 id="1.1-Present-the-photodiode-to-test-timing-accuracy">1.1 Present the photodiode to test timing accuracy<a class="anchor-link" href="#1.1-Present-the-photodiode-to-test-timing-accuracy">¶</a></h2><p>You should add a key functionality to your experiment: presenting a photodiode square. To get a ground truth of the events timing, you should display a white square at the onset of each experimental event, which then turns back to black. We recommend presenting it in a corner of the display, like so (the dark square in the top right corner):</p>
+<h2 id="1.1-Present-the-photodiode-to-test-timing-accuracy">1.1 Present the photodiode to test timing accuracy<a class="anchor-link" href="#1.1-Present-the-photodiode-to-test-timing-accuracy">¶</a></h2><p>You should add a key functionality to your experiment: presenting a photodiode square. To get a ground truth of the events timing, you should display a white square at the onset of each experimental event, which then turns back to black. We recommend presenting it in a corner of the display, like so (the dark square in the top left corner):</p>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/Screenshot.png" width="500"/>
+<img alt="Centered Image" src="img/Screenshot.jpg" width="500"/>
 </div>
 <p>You can find an example on how to present such a square under <a href="https://github.com/Cogitate-consortium/ExperimentTestingFramework/blob/main/dummyExperiment/drawPhotodiode.m">drawPhotodiode.m</a> in psychtoolbox.</p>
 <h2 id="1.2-Record-keyboard-press-sound">1.2 Record keyboard press sound<a class="anchor-link" href="#1.2-Record-keyboard-press-sound">¶</a></h2><p>You should add a functionality to record audio from a contact microphone to your script. By recording the sound produced by button press, you can parse the recorded audio file to extract the time at which a button press occured, that can then be compared against the recorded time of button press by your experimental software to test timing accuracy. You can find an example on how to do so with psychtoolbox in the script <a href="https://github.com/Cogitate-consortium/ExperimentTestingFramework/blob/main/dummyExperiment/dummyExperiment.m">dummyExperiment.m</a> at line 48 to 56</p>
@@ -7674,11 +7682,15 @@ Here is the arbitrary response sequence we will perform for the first 15 trials:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="3.-Prepare-for-a-test-run:">3. Prepare for a test run:<a class="anchor-link" href="#3.-Prepare-for-a-test-run:">¶</a></h1><h2 id="3.1-Attach-the-photodiode">3.1 Attach the photodiode<a class="anchor-link" href="#3.1-Attach-the-photodiode">¶</a></h2><p>Finally, we will attach the photodiode recording device on top of the square that we have implemented, like so:</p>
+<h1 id="3.-Prepare-for-a-test-run:">3. Prepare for a test run:<a class="anchor-link" href="#3.-Prepare-for-a-test-run:">¶</a></h1><h2 id="3.1-Attach-the-photodiode">3.1 Attach the photodiode<a class="anchor-link" href="#3.1-Attach-the-photodiode">¶</a></h2><p>We will attach the photodiode recording device on top of the square that we have implemented, like so:</p>
 <div style="text-align: center;">
 <img alt="Centered Image" src="img/PhotodiodePlacement.jpg" width="500"/>
 </div>
-<h2 id="3.2-Prepare-to-take-notes-of-the-presented-events">3.2 Prepare to take notes of the presented events<a class="anchor-link" href="#3.2-Prepare-to-take-notes-of-the-presented-events">¶</a></h2><p>In order to check that the information about the presented events recorded in the log files match the events that actually occured on the screen, you should will take notes of what happens on the screen. These notes can then be compared to the information found in the log files to ensure that the information that is logged is correct</p>
+<h2 id="3.2-Place-the-contact-microphone">3.2 Place the contact microphone<a class="anchor-link" href="#3.2-Place-the-contact-microphone">¶</a></h2><p>We will attach the contact microphone on the keyboard used as response device, in close proximity to the key that we will use in our experiment:</p>
+<div style="text-align: center;">
+<img alt="Centered Image" src="img/MicPlacement.jpg" width="500"/>
+</div>
+<h2 id="3.3-Prepare-to-take-notes-of-the-presented-events">3.3 Prepare to take notes of the presented events<a class="anchor-link" href="#3.3-Prepare-to-take-notes-of-the-presented-events">¶</a></h2><p>In order to check that the information about the presented events recorded in the log files match the events that actually occured on the screen, you should will take notes of what happens on the screen. These notes can then be compared to the information found in the log files to ensure that the information that is logged is correct</p>
 </div>
 </div>
 </div>
@@ -7708,7 +7720,7 @@ Here is the arbitrary response sequence we will perform for the first 15 trials:
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [43]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [38]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">width_cm</span> <span class="o">=</span> <span class="mf">6.3</span>
@@ -7746,7 +7758,7 @@ Here is the arbitrary response sequence we will perform for the first 15 trials:
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>As we can see, we are pretty close of the expected 6 degrees. All measured values can be entered in the protocol in section 4. Note that in this particular experimental design, the eccentricity does not need to be reported, as the stimuli are presented centrally.</p>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/DVACheck.png" width="500"/>
+<img alt="Centered Image" src="img/DVACheck.jpg"/>
 </div>
 </div>
 </div>
@@ -7797,7 +7809,7 @@ Here is the arbitrary response sequence we will perform for the first 15 trials:
 </tr>
 </tbody>
 </table>
-<p>To achieve this, the experiment was started and I manually noted what was presented on a piece of paper. I did so for 20 trials in a row:</p>
+<p>To achieve this, the experiment was started and we manually noted what was presented on a piece of paper. We did so for 20 trials in a row:</p>
 <table>
 <thead>
 <tr>
@@ -7846,7 +7858,7 @@ Here is the arbitrary response sequence we will perform for the first 15 trials:
 </table>
 <p>This was then compared to the information that was logged. As we can see, the two sequences are the same, so we know that the logging is correct. Note that we are ignoring the duration condition for now, this will be tested more thoroughly in the next section. We can now fill the section 5 of the protocol:</p>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/LogFileContent.png" width="500"/>
+<img alt="Centered Image" src="img/LogFileContent.jpg" width="500"/>
 </div>
 </div>
 </div>
@@ -7887,7 +7899,7 @@ Here is the arbitrary response sequence we will perform for the first 15 trials:
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [44]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [39]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Set path:</span>
@@ -7926,7 +7938,7 @@ Here is the arbitrary response sequence we will perform for the first 15 trials:
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>According to the log file, the left key was pressed for the first 5 trials, then right for the next 5 trials and  then "wrongKey" for the next 5 trials. This corresponds to what is expected based on your planned response sequence as the button "up" does not corresponds to any relevant response in the context of our experiment. You can fill the secont 6 of our protocol.io:</p>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/responseLoggingCheck.png" width="500"/>
+<img alt="Centered Image" src="img/ResponseLoggingCheck.jpg"/>
 </div>
 </div>
 </div>
@@ -7938,7 +7950,7 @@ Here is the arbitrary response sequence we will perform for the first 15 trials:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="7.-Controlled-events-timing">7. Controlled events timing<a class="anchor-link" href="#7.-Controlled-events-timing">¶</a></h1><p>So far, we have been testing the experiment in terms of content: making sure that the stimuli are presented in the right way and that the correct content is being logged. Now, we will test that the timing of the events is correct. To that end, the experiment was ran once in our lab. The experiement was programmed such that whenever a new event occured, a square turned from black to white. We placed a photo-sensor over this square, which enabled us to record physical changes on the screen at the onset of each new event. This recording can then be analyzed to test the timing accuracy of our experiment. We will here show how this is performed.
+<h1 id="7.-Controlled-events-timing">7. Controlled events timing<a class="anchor-link" href="#7.-Controlled-events-timing">¶</a></h1><p>So far, we have been testing the experiment in terms of content: making sure that the stimuli are presented in the right way and that the correct content is being logged. Now, we will test that the timing of the events is correct. To that end, the experiment was ran once in our lab. The experiement was programmed such that whenever a new event occured, a square turned from black to white. We placed a photodiode over this square, which enabled us to record physical changes on the screen at the onset of each new event. This recording can then be analyzed to test the timing accuracy of our experiment. We will here show how this is performed.
 In our experiment, there are three events in each trial:</p>
 <ul>
 <li>Stimulus onset</li>
@@ -7954,7 +7966,7 @@ In our experiment, there are three events in each trial:</p>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [45]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [40]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Loading the photodiode data:</span>
@@ -7996,7 +8008,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [46]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [41]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Extract the photodiode signal:</span>
@@ -8016,7 +8028,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[46]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[41]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>Text(0.5, 0, 'Time (s)')</pre>
 </div>
@@ -8045,7 +8057,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [47]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [42]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Set our threshold:</span>
@@ -8077,7 +8089,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[47]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[42]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>Text(0.5, 1.0, 'Binarized photodiode signal')</pre>
 </div>
@@ -8112,7 +8124,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [48]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [43]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Compute the discrete difference of the signal:</span>
@@ -8133,7 +8145,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[48]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[43]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>Text(0.5, 1.0, 'Binarized photodiode signal')</pre>
 </div>
@@ -8162,7 +8174,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [49]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [44]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Extract the times stamps  from the photodiode:</span>
@@ -8207,7 +8219,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [50]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [45]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Compute the intervals from both the photodiode and the log file:</span>
@@ -8238,7 +8250,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[50]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[45]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>Text(0.5, 1.0, 'Timing inaccuaracies (Log - Photo)')</pre>
 </div>
@@ -8273,7 +8285,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [51]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [46]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">mean_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">log_interval</span> <span class="o">-</span> <span class="n">pd_interval</span><span class="p">)</span>
@@ -8306,10 +8318,10 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>Based on all these information, you can now fill section 7 of the protocol:</p>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/photodiodeThreshold.png" width="500">
+<img alt="Centered Image" src="img/photodiodeThreshold.jpg">
 </img></div>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/logTimingAccuracy.png" width="500">
+<img alt="Centered Image" src="img/LogTimingAccuracy.jpg">
 </img></div>
 </div>
 </div>
@@ -8330,7 +8342,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [52]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [47]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Loading the audio data:</span>
@@ -8352,7 +8364,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[52]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[47]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>Text(0.5, 0, 'Time (s)')</pre>
 </div>
@@ -8381,7 +8393,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [53]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [48]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Detect the peaks in the signal</span>
@@ -8403,9 +8415,9 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[53]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[48]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>&lt;matplotlib.legend.Legend at 0x13d76603d10&gt;</pre>
+<pre>&lt;matplotlib.legend.Legend at 0x2477b9e41d0&gt;</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
@@ -8421,7 +8433,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [54]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [49]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Compute the interval between each button press from the recorded signal:</span>
@@ -8448,7 +8460,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[54]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[49]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>Text(0.5, 1.0, 'Timing inaccuaracies (Log - Photo)')</pre>
 </div>
@@ -8466,7 +8478,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [55]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [50]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">mean_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">log_interval</span> <span class="o">-</span> <span class="n">mic_interval</span><span class="p">)</span>
@@ -8499,10 +8511,10 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>As we can see from the histogram, there is quite a bit of jitter in the log file timestamping of the responses. This is not too surprising, given that to perform these tests, we used a normal computer keyboard, which do not have optimal performance. For experiments requiring highly precise reaction time data, it is important to consider using reaction time data. Based on the information above, we can now fill the protocol.io section 8:</p>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/UncontrolledEventsTimingCheck.png" width="500">
+<img alt="Centered Image" src="img/UncontrolledEventsTimingCheck.jpg">
 </img></div>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/UncontrolledEventsTimingCheck2.png" width="500">
+<img alt="Centered Image" src="img/UncontrolledEventsTimingCheck2.jpg">
 </img></div>
 </div>
 </div>
@@ -8538,7 +8550,7 @@ Reading 0 ... 141299  =      0.000 ...   141.299 secs...
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [56]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [51]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">nTrials</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -8579,7 +8591,7 @@ N trials per condition
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>We have 20 trials for each of the conditions, which is in line with our expected experimental design. This can be repored in the protocol.io under the section 9:</p>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/trialNumbersCheck.png" width="500">
+<img alt="Centered Image" src="img/TrialNumbersCheck.jpg">
 </img></div>
 </div>
 </div>
@@ -8600,7 +8612,7 @@ N trials per condition
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [57]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [52]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Extract the observed duration of the stimuli. In our case, it is every second entry of the photodiode interval:</span>
@@ -8653,7 +8665,7 @@ N trials per condition
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>As we can see, this is quite accurate. Most trials were displayed for exactly the duration we expected. In a few trials, the stimuli were displayed for ~16ms more than expected, which indicates that a skipped frame occureed in a minority of the trials, which isn't too alarming. We can report the results of this test in the section 10 of the protocol.io as follows:</p>
 <div style="text-align: center;">
-<img alt="Centered Image" src="img/plannedDurationCheck.png" width="500">
+<img alt="Centered Image" src="img/plannedDurationCheck.jpg">
 </img></div>
 </div>
 </div>
@@ -8674,7 +8686,7 @@ N trials per condition
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [58]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [53]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Extract the observed duration of the stimuli. In this case, it is every second entry of the photodiode interval starting from 1 instead of 0:</span>
@@ -8764,7 +8776,7 @@ We would like to thank all the COGITATE consortium members:
 </a>
 </div>
 </div>
-<img alt="No description has been provided for this image" src="img/templeton_logo.png" style="float: right;" width="200;"/>
+<img alt="No description has been provided for this image" src="img/templeton_logo.jpg" style="float: right;" width="200;"/>
 <br/>
 <br/>
 <p>This research was supported by Templeton World Charity Foundation (<a href="https://doi.org/10.54224/20389">TWCF0389</a>) and the Max Planck Society. The opinions expressed in this publication are those of the authors and do not necessarily reflect the views of TWCF.</p>
