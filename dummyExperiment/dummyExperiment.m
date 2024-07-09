@@ -4,12 +4,13 @@ close all;
 sca;
 
 % Set the global variables:
-global isTestMode squareSize circleDiameter xCenter yCenter white black screenYpixels screenXpixels photoSquareSize
+global isTestMode white black photoSquareSize
 
 % Prompt for the subject name:
-[subjectName, isTestMode] = runInput();
+[subjectName, isTestMode, distanceFromScreen] = runInput();
 disp(['Subject Name: ', subjectName]);
 disp(['Test Mode: ', num2str(isTestMode)]);
+disp(['Distance from screen: ', distanceFromScreen]);
 
 %% Setup Psychtoolbox:
 PsychDefaultSetup(1);
@@ -21,14 +22,28 @@ black = BlackIndex(screenNumber);
 grey = white / 2;
 
 % Open the screen
-Screen('Preference', 'SkipSyncTests', 0   );
+Screen('Preference', 'SkipSyncTests', 1);
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber, grey);
+Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
+% Load the images
+starTexture = createTexture(fullfile(pwd, 'stimuli', 'star.png'), window);
+triangleTexture = createTexture(fullfile(pwd, 'stimuli', 'triangle.png'), window);
 
 % Get the size of the screen
 [screenXpixels, screenYpixels] = Screen('WindowSize', window);
 
 % Get the center coordinates of the window
 [xCenter, yCenter] = RectCenter(windowRect);
+
+% Convert stim size from DVA to pixels
+stimWidthDVA = 6;
+stimHeightDVA = 6;
+screenWidthcm = 53.2;
+screenHeightcm = 29.8;
+
+[stimWidthPx, stimHeightPx] = convertDVAToPixels(stimWidthDVA, ...
+    stimHeightDVA, screenXpixels,...
+    screenWidthcm, distanceFromScreen);
 
 % Get the refresh rate:
 hz  = Screen('NominalFrameRate', window); % Screen refresh rate
@@ -43,18 +58,19 @@ Screen('TextFont', window, 'Arial');
 escapeKey = KbName('ESCAPE');
 leftKey = KbName('LeftArrow');
 rightKey = KbName('RightArrow');
+pauseKey = KbName('p');
 
 % Record audio for test mode, to record the sound of key presses:
-if isTestMode
-    InitializePsychSound(1);
-    nchannels = 1; % Number of audio channels
-     freq = 44100;
-    pahandle = PsychPortAudio('Open', [], 2, 2, freq, 2, [], 0.02);
-    PsychPortAudio('GetAudioData', pahandle, 600 ); % Preallocate buffer for 10 seconds (will auto-grow if needed)
-end
+% if isTestMode
+%     InitializePsychSound(1);
+%     nchannels = 1; % Number of audio channels
+%      freq = 44100;
+%     pahandle = PsychPortAudio('Open', [], 2, 2, freq, 2, [], 0.02);
+%     PsychPortAudio('GetAudioData', pahandle, 600 ); % Preallocate buffer for 10 seconds (will auto-grow if needed)
+% end
 
 %% Design parameters
-shapes        = {'square', 'circle'};  % Shapes to presented
+shapes        = {'star', 'triangle'};  % Shapes to presented
 durations     = round([1.0, 1.5] / ... % Duration of the stimuli, adjusted to match the refresh rate
     ifi) * ifi;
 trialDuration = 2.0;                   % Total duration of each trial
@@ -107,10 +123,10 @@ while 1
     end
 end
 WaitSecs(rand + 0.5);  % Add a random jitter
-if isTestMode
-    % Start audio recording immediately
-    PsychPortAudio('Start', pahandle, 0, 0, 1);
-end
+% if isTestMode
+%     % Start audio recording immediately
+%     PsychPortAudio('Start', pahandle, 0, 0, 1);
+% end
 % Loop through each unique trial
 for i = 1:totalTrials
     
@@ -127,7 +143,12 @@ for i = 1:totalTrials
     rt               = 0;
     
     % Show the current stimulus:
-    [onsetTime] = showStimulus(shape, window);   % Show the stimulus
+    switch shape
+        case 'triangle'
+            [onsetTime] = showStimulus(triangleTexture, window, stimWidthPx, stimHeightPx, xCenter, yCenter);   % Show the stimulus
+        case 'star'
+            [onsetTime] = showStimulus(starTexture, window, stimWidthPx, stimHeightPx, xCenter, yCenter);   % Show the stimulus
+    end
     
     % Set the flags
     photoFlag   = 1;         % The photodiode is turned on when the stimulus appears
@@ -181,15 +202,14 @@ for i = 1:totalTrials
                     % Abort the experiment if the escape key was pressed
                     escapeKeyPressed = true;
                     break;
+                elseif keyCode(pauseKey)
+                    pause;
                 elseif keyCode(rightKey)
                     response = 'right';
                     responseKey = find(keyCode);
                 elseif keyCode(leftKey)
                     response = 'left';
                     responseKey = find(keyCode);
-                elseif strcmp('p', KbName(keyCode))
-                    % Abort the experiment if the escape key was pressed
-                    KbWait()
                 else
                     response = 'wrongKey';
                     responseKey = find(keyCode);
