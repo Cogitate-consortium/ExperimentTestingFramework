@@ -1,17 +1,20 @@
+<img src="dummyExperiment/img/standardized-team4.jpg" width=1400 />
+
 # ExperimentTestingFramework
 This repository contain all code used in the paper: "A standardized framework to test event-based experiments."
 
 ## Setup
-The environment should be installed by entering:
-```
-conda env create -f environment.yml
-```
+The only dependency of this repository is mne python. Make sure to follow the installation guidelines [here](https://mne.tools/stable/install/index.html)
 
 If you wish to run the simulation of ERP, make sure to download the EEG data set found here:
 https://purl.stanford.edu/bq914sc3730 [[1]](#1)
 
 The scripts for the simulation are organized such that each analysis is accompanied by a config.json file.
 The variable "bids_root" should be adjusted in each of them with the path to where you wish to store the data. 
+
+## Dummy Experiment
+To illustrate how to conduct this framework, we provide a [dummy experiment](https://github.com/Cogitate-consortium/ExperimentTestingFramework/tree/main/dummyExperiment)
+ accompanied by a [Jupyter notebook](https://github.com/Cogitate-consortium/ExperimentTestingFramework/blob/main/dummyExperiment/TestingProtocol.ipynb) illustrating how this our testing pipelines can be applied to fully characterize the performances of an experimental setup
 
 ## Simulations
 To run the simulation and generate the figures presented in the paper, the downloaded data must
