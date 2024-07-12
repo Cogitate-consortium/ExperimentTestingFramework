@@ -74,7 +74,7 @@ This repository is brought to you by the following members of the cogitate conso
 <div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
    <div style="text-align: center;">
       <a href="https://www.arc-cogitate.com/our-team" target="_blank">
-         <img src="dummyExperiment/img/IEEG TEAM.png" alt="iEEG team">
+         <img src="dummyExperiment/img/standardized-team1.jpg" alt="iEEG team">
       </a>
    </div>
 </div>
@@ -83,11 +83,11 @@ We would like to thank all the COGITATE consortium members:
 <div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
    <div style="text-align: center;">
       <a href="https://www.arc-cogitate.com/our-team" target="_blank">
-         <img src="dummyExperiment/img/IEEG DP Authors.png" alt="COGITATE team">
+         <img src="dummyExperiment/img/IEEG DP Authors.jpg" alt="COGITATE team">
       </a>
    </div>
 </div>
-<img style="float: right;" src="dummyExperiment/img/templeton_logo.png" width=200;>
+<img style="float: right;" src="dummyExperiment/img/templeton_logo.jpg" width=200;>
 <br />
 <br />
 
