@@ -68,3 +68,27 @@ Then, based on this dataframe, it generates all the plots found in both the pape
 Kaneshiro, B., Perreau Guimaraes, M., Kim, H. S., Norcia, A. M., & Suppes, P. (2015). 
 A representational similarity analysis of the dynamics of object processing using single-trial EEG classification. 
 Plos one, 10(8), e0135697.
+
+# Acknowledgments
+This repository is brought to you by the following members of the cogitate consortium:
+<div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
+   <div style="text-align: center;">
+      <a href="https://www.arc-cogitate.com/our-team" target="_blank">
+         <img src="dummyExperiment/img/IEEG TEAM.png" alt="iEEG team">
+      </a>
+   </div>
+</div>
+<br />
+We would like to thank all the COGITATE consortium members:
+<div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
+   <div style="text-align: center;">
+      <a href="https://www.arc-cogitate.com/our-team" target="_blank">
+         <img src="dummyExperiment/img/IEEG DP Authors.png" alt="COGITATE team">
+      </a>
+   </div>
+</div>
+<img style="float: right;" src="dummyExperiment/img/templeton_logo.png" width=200;>
+<br />
+<br />
+
+This research was supported by Templeton World Charity Foundation ([TWCF0389](https://doi.org/10.54224/20389)) and the Max Planck Society. The opinions expressed in this publication are those of the authors and do not necessarily reflect the views of TWCF.
