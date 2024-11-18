@@ -4,6 +4,8 @@
 This repository contain all code used in the paper: "A standardized framework to test event-based experiments."
 
 ## Setup
+You can execute Jupyter notebooks directly on binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Cogitate-consortium/ExperimentTestingFramework/tutorial)
+
 The only dependency of this repository is mne python. Make sure to follow the installation guidelines [here](https://mne.tools/stable/install/index.html)
 
 If you wish to run the simulation of ERP, make sure to download the EEG data set found here:
